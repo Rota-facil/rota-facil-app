@@ -1,0 +1,25 @@
+pre-commit:
+  parallel: false
+  commands:
+    biome:
+      glob: "*.{js,jsx,ts,tsx,json}"
+      run: |
+        npx biome check --write --no-errors-on-unmatched {staged_files}
+
+        status=$?
+
+        if [ $status -ne 0 ]; then
+          exit $status
+        fi
+
+        git add {staged_files}
+
+commit-msg:
+  commands:
+    commitlint:
+      run: npx commitlint --edit {1}
+
+#pre-push:
+#  commands:
+#    tests:
+#      run: npm test -- --ci --passWithNoTests

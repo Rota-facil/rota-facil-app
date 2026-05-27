@@ -3,9 +3,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 const home: React.FC = () => {
   return (
-    <SafeAreaView
-      style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
-    >
+    <SafeAreaView style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
       <Text>Hello world</Text>
     </SafeAreaView>
   );

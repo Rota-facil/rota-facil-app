@@ -1,50 +1,24 @@
-# Welcome to your Expo app 👋
+# Rota Fácil - Plataforma de gerenciamento inteligente para transporte escolar municipal
+![cover](./assets/docs/thumb.jpg)
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+<br/>
 
-## Get started
+O Rota Fácil é uma solução desenvolvida para modernizar e centralizar o gerenciamento do transporte escolar municipal, permitindo que prefeituras, motoristas e estudantes acompanhem rotas, viagens e informações importantes em tempo real. O sistema foi pensado para reduzir falhas de comunicação, aumentar a visibilidade das operações e oferecer uma experiência mais organizada para todos os participantes envolvidos no transporte escolar.
 
-1. Install dependencies
+O aplicativo mobile desenvolvido em React Native representa uma das principais interfaces da plataforma, permitindo que estudantes acompanhem viagens, realizem check-in via QR Code e visualizem informações relacionadas às rotas, enquanto motoristas conseguem acompanhar viagens do dia, acessar listas de alunos e executar operações relacionadas ao transporte diretamente pelo dispositivo móvel.
 
-   ```bash
-   npm install
-   ```
+A solução faz parte de uma arquitetura distribuída baseada em microserviços, utilizando mensageria com RabbitMQ, banco de dados PostgreSQL e serviços independentes containerizados com Docker, permitindo escalabilidade, desacoplamento e maior confiabilidade na comunicação entre os componentes do sistema. 
 
-2. Start the app
+A documentação do projeto foi organizada em arquivos separados para facilitar manutenção, leitura e evolução da aplicação ao longo do desenvolvimento.
 
-   ```bash
-   npx expo start
-   ```
+📌 [Como contribuir](./docs/CONTRIBUTING.md)   
+📌 [Estrutura do projeto](./docs/PROJECT_STRUCTURE.md)   
+📌 [Como executar o projeto](./docs/RUNNING.md)   
+📌 [Principais telas do aplicativo](./docs/SCREENS.md)  
 
-In the output, you'll find options to open the app in a
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+<br/>
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+### Licença
 
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Este projeto está sob a licença MIT.

@@ -1,11 +1,14 @@
-import { Text } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { CirclePlus } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react-native";
+import { Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import OnboardingScreen from "./overview/screens/OverviewScreen";
 
 const home: React.FC = () => {
   return (
-    <SafeAreaView style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-      <Text>Hello world</Text>
-    </SafeAreaView>
+    <SafeAreaProvider>
+      <OnboardingScreen />
+    </SafeAreaProvider>
   );
 };
 

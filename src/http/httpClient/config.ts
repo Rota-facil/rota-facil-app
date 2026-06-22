@@ -3,5 +3,4 @@
  */
 export const config = {
   apiBaseUrl: "", // url de desenvolvimento
-} as const
-
+} as const;

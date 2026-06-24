@@ -2,18 +2,18 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
 import { StorageError } from "../errors/storageError";
 
-export const STORAGE_KEYS = {
+const STORAGE_KEYS = {
   AUTH_TOKEN: "auth_token",
   FIRST_ACCESS: "first_access",
 } as const;
 
-export type StorageKey = (typeof STORAGE_KEYS)[keyof typeof STORAGE_KEYS];
+type StorageKey = (typeof STORAGE_KEYS)[keyof typeof STORAGE_KEYS];
 
 const SECURE_KEYS: StorageKey[] = [STORAGE_KEYS.AUTH_TOKEN];
 
 const isSecure = (key: StorageKey) => SECURE_KEYS.includes(key);
 
-export const storageService = {
+const StorageService = {
   async save<T>(key: StorageKey, value: T): Promise<void> {
     try {
       const serialized = JSON.stringify(value);
@@ -65,3 +65,5 @@ export const storageService = {
     }
   },
 };
+
+export { STORAGE_KEYS, type StorageKey, StorageService };

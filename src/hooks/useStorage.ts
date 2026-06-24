@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { StorageError } from "@/core/errors/storageError";
-import { STORAGE_KEYS, storageService } from "../core/service/storageService";
+import { STORAGE_KEYS, StorageService } from "../core/service/storageService";
 
 export function useStorage() {
   const [token, setToken] = useState<string | null>(null);
@@ -10,7 +10,7 @@ export function useStorage() {
 
   const getToken = useCallback(async () => {
     try {
-      const data = await storageService.get<string>(STORAGE_KEYS.AUTH_TOKEN);
+      const data = await StorageService.get<string>(STORAGE_KEYS.AUTH_TOKEN);
       setToken(data);
     } catch (err) {
       const storageError = err instanceof StorageError ? err : new StorageError(String(err));
@@ -20,7 +20,7 @@ export function useStorage() {
 
   const getFirstAccess = useCallback(async () => {
     try {
-      const data = await storageService.get<boolean>(STORAGE_KEYS.FIRST_ACCESS);
+      const data = await StorageService.get<boolean>(STORAGE_KEYS.FIRST_ACCESS);
       setFirstAccess(data);
     } catch (err) {
       const storageError = err instanceof StorageError ? err : new StorageError(String(err));

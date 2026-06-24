@@ -1,19 +1,16 @@
-import { CirclePlus } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react-native";
 import { Redirect } from "expo-router";
-import { Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { useStorage } from "../hooks/useStorage";
+import { useSession } from "@/hooks/useSession";
 import OnboardingScreen from "../presentation/shared/screens/OverviewScreen";
 
 const home: React.FC = () => {
-  const { token, firstAccess, isLoading, error } = useStorage();
+  const { loading, session, firstAccess } = useSession();
 
-  if (isLoading) {
+  if (loading) {
     // screen loading
   }
 
-  if (token) {
+  if (session) {
     // return <Redirect href="/home" />;
   }
 

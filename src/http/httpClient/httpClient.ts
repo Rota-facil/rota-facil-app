@@ -1,4 +1,5 @@
-import { HttpError } from "@/core/errors/httpError";
+import { HttpClientError, HttpServerError } from "@/core/errors/errors";
+import { HttpError } from "@/errors/httpError";
 import { config } from "./config";
 
 /**
@@ -14,20 +15,38 @@ const httpClient = {
     request<T>(path, { ...init, method: "POST", body: JSON.stringify(body) }),
 };
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${config.apiBaseUrl}${path}`, {
-    ...init,
-    headers: {
-      "Content-Type": "application/json",
-      ...init?.headers,
-    },
-  });
+export async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  let response: Response;
 
-  if (!response.ok) {
-    throw new HttpError(response.status, `Falha na requisição: ${response.status}`);
+  try {
+    response = await fetch(`${config.apiBaseUrl}${path}`, {
+      ...init,
+      headers: {
+        "Content-Type": "application/json",
+        ...init?.headers,
+      },
+    });
+  } catch (error) {
+    throw new HttpClientError("Falha ao conectar com o servidor");
   }
 
-  return (await response.json()) as T;
+  if (!response.ok) {
+    let message = `Falha na requisição (${response.status})`;
+
+    const body = await response.json();
+
+    if (body?.message) {
+      message = body.message;
+    }
+
+    throw new HttpServerError(message, response.status);
+  }
+
+  try {
+    return (await response.json()) as T;
+  } catch {
+    throw new HttpClientError("Falha ao processar resposta do servidor");
+  }
 }
 
 export { httpClient };

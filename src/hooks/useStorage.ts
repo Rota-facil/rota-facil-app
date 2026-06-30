@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { StorageError } from "@/core/errors/storageError";
+import { StorageError } from "@/errors/storageError";
 import { STORAGE_KEYS, StorageService } from "../core/service/storageService";
 
 export function useStorage() {

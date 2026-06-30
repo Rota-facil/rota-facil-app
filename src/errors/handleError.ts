@@ -1,5 +1,5 @@
 import { AuthService } from "@/core/service/authService";
-import { BackgroundError, HttpClientError, HttpServerError } from "./errors";
+import { BackgroundError, HttpClientError, HttpServerError, SoftError } from "./errors";
 import { logError, showError } from "./showError";
 
 function handleError(error: unknown) {
@@ -26,3 +26,5 @@ function handleError(error: unknown) {
     logError(error.message);
   }
 }
+
+export { handleError };

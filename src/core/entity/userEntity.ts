@@ -16,4 +16,4 @@ interface UserEntity {
   prefecture: PrefecturesEntity;
 }
 
-export type { UserEntity };
+export type { UserEntity, UserRole };

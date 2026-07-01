@@ -1,20 +1,18 @@
-// src/app/overview/screens/OverviewScreen.tsx
-
 import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { SafeAreaView, View } from "react-native";
-import { OverviewButton } from "../components/OverviewButton";
-import { OnboardingCard } from "../components/OverviewCard";
-import { OnboardingHeader } from "../components/OverviewHeader";
-import { PaginationDots } from "../components/PaginationDots";
-
+import { View } from "react-native";
+import { OnboardingCard } from "../components/atoms/overviewCard";
+import { PaginationDots } from "../components/atoms/paginationDots";
+import { SystemButton } from "../components/atoms/systemButton";
+import { OnboardingHeader } from "../components/molecules/overviewHeader";
 import { Slides } from "../data/slides";
 
 export default function OverviewScreen() {
+  const { replace } = useRouter();
+
   const [currentIndex, setCurrentIndex] = useState(0);
-
   const currentSlide = Slides[currentIndex];
-
   const isLastSlide = currentIndex === Slides.length - 1;
 
   const handleNext = () => {
@@ -23,11 +21,7 @@ export default function OverviewScreen() {
       return;
     }
 
-    console.log("Ir para Login");
-  };
-
-  const handleSkip = () => {
-    setCurrentIndex(Slides.length - 1);
+    replace("/login");
   };
 
   return (
@@ -36,11 +30,11 @@ export default function OverviewScreen() {
       locations={[0, 0.49, 0.74, 1]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 0 }}
-      className="flex-1"
+      className="flex flex-1"
     >
-      <SafeAreaView className="flex-1 px-6 pb-8 justify-between">
-        <View className="mt-4">
-          <OnboardingHeader onSkip={handleSkip} showSkip={!isLastSlide} />
+      <View className="flex-1 px-6 pb-8 justify-between">
+        <View className="mt-6">
+          <OnboardingHeader onSkip={() => replace("/login")} showSkip={!isLastSlide} />
         </View>
 
         <OnboardingCard
@@ -54,9 +48,13 @@ export default function OverviewScreen() {
         <View>
           <PaginationDots total={Slides.length} currentIndex={currentIndex} />
 
-          <OverviewButton title={isLastSlide ? "Começar" : "Continuar"} onPress={handleNext} />
+          <SystemButton
+            title={isLastSlide ? "Começar" : "Continuar"}
+            onPress={handleNext}
+            iconRight="chevron-right"
+          />
         </View>
-      </SafeAreaView>
+      </View>
     </LinearGradient>
   );
 }

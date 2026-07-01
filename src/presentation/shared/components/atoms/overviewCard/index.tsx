@@ -54,6 +54,7 @@ export function OnboardingCard({
             {/* Badge */}
           </LinearGradient>
         </View>
+
         <View className="absolute -bottom-4 -right-4 h-12 w-12 rounded-full bg-white items-center justify-center shadow-md border border-slate-100">
           <FontAwesome5 name="bus" size={24} color="#2563EB" />
         </View>

@@ -38,7 +38,7 @@ export function SystemButton({
       onPress={onPress}
       activeOpacity={0.85}
       disabled={isDisabled}
-      className="w-full mt-6"
+      className="w-full"
     >
       <LinearGradient
         colors={isDisabled ? ["#64748B", "#94A3B8"] : ["#1E3A8A", "#3B82F6"]}

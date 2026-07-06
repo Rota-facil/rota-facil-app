@@ -1,5 +1,3 @@
-import { CreateUserDTO, CreateUserResponseDTO } from "../dto/createUserDTO";
-import { LoginDTO, LoginResponseDTO } from "../dto/loginDTO";
 import type { UserDTO } from "../dto/UserDTO";
 import { httpClient } from "../httpClient/httpClient";
 

@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
-import { StorageError } from "../../errors/storageError";
+import { StorageError } from "../../errors/errors";
 
 const STORAGE_KEYS = {
   AUTH_TOKEN: "auth_token",

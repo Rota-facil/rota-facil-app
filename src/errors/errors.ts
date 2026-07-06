@@ -72,4 +72,15 @@ class BackgroundError extends ApplicationError {
   }
 }
 
-export { BackgroundError, HttpClientError, HttpServerError, SoftError };
+class StorageError extends ApplicationError {
+  constructor(message: string) {
+    super(message);
+    this.name = "StorageError";
+  }
+
+  handleError() {
+    showError(this.message);
+  }
+}
+
+export { BackgroundError, HttpClientError, HttpServerError, SoftError, StorageError };

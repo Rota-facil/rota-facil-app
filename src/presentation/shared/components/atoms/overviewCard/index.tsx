@@ -1,15 +1,24 @@
 import { Feather, FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import React from "react";
 import { Text, View } from "react-native";
 
-interface OnboardingCardProps {
+type MaterialIconName = keyof typeof MaterialIcons.glyphMap;
+type FeatherIconName = keyof typeof Feather.glyphMap;
+
+type OnboardingCardProps = {
   title: string;
   description: string;
-  iconName: string;
-  iconType: "material" | "feather";
   gradientColors: [string, string];
-}
+} & (
+  | {
+      iconName: MaterialIconName;
+      iconType: "material";
+    }
+  | {
+      iconName: FeatherIconName;
+      iconType: "feather";
+    }
+);
 
 export function OnboardingCard({
   title,
@@ -23,10 +32,10 @@ export function OnboardingCard({
     const iconColor = "#FFFFFF";
 
     if (iconType === "material") {
-      return <MaterialIcons name={iconName as any} size={iconSize} color={iconColor} />;
+      return <MaterialIcons name={iconName} size={iconSize} color={iconColor} />;
     }
 
-    return <Feather name={iconName as any} size={iconSize} color={iconColor} />;
+    return <Feather name={iconName} size={iconSize} color={iconColor} />;
   };
 
   return (

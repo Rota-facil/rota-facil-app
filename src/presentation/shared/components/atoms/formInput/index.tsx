@@ -1,6 +1,5 @@
 import { type Control, Controller, type FieldValues, get, type Path } from "react-hook-form";
 import { Text, View } from "react-native";
-import { colors } from "@/presentation/shared/styles/colors";
 import { BaseInput } from "../baseInput";
 
 interface FormInputProps<T extends FieldValues> {

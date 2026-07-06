@@ -1,6 +1,6 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import { useState } from "react";
 import { View } from "react-native";
 import { OnboardingCard } from "../components/atoms/overviewCard";
 import { PaginationDots } from "../components/atoms/paginationDots";
@@ -21,7 +21,7 @@ export default function OverviewScreen() {
       return;
     }
 
-    replace("/login");
+    replace("/(auth)/login");
   };
 
   return (
@@ -34,7 +34,7 @@ export default function OverviewScreen() {
     >
       <View className="flex-1 px-6 pb-8 justify-between">
         <View className="mt-6">
-          <OnboardingHeader onSkip={() => replace("/login")} showSkip={!isLastSlide} />
+          <OnboardingHeader onSkip={() => replace("/(auth)/login")} showSkip={!isLastSlide} />
         </View>
 
         <OnboardingCard

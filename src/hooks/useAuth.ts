@@ -4,51 +4,61 @@ import { AuthService } from "@/core/service/authService";
 import { handleError } from "@/errors/handleError";
 import type { CreateUserDTO } from "@/http/dto/createUserDTO";
 import type { LoginDTO } from "@/http/dto/loginDTO";
+import { useSessionActions } from "./useSessionActions";
 
 /**
  * Hook responsável por gerenciar e ser uma
  * ponte entre as requisições de autenticação do usuário.
  **/
 function useAuth() {
+  const { applySession, clearSession } = useSessionActions();
   const [isLoading, setLoading] = useState<boolean>(false);
   const [messageError, setErrorMessage] = useState<string | null>(null);
 
-  const register = useCallback(async (credentials: CreateUserDTO) => {
-    setLoading(true);
+  const register = useCallback(
+    async (credentials: CreateUserDTO) => {
+      setLoading(true);
 
-    try {
-      const user = await AuthService.register(credentials);
+      try {
+        const user = await AuthService.register(credentials);
 
-      if (!user.accessToken) {
-        return;
+        if (!user.accessToken) {
+          return;
+        }
+
+        applySession(user.accessToken, false);
+        router.replace("/(private)/students/home");
+      } catch (e) {
+        handleError(e);
+      } finally {
+        setLoading(false);
       }
+    },
+    [applySession],
+  );
 
-      router.replace("/(private)/students/home");
-    } catch (e) {
-      handleError(e);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const login = useCallback(
+    async (credentials: LoginDTO) => {
+      setLoading(true);
+      setErrorMessage(null);
 
-  const login = useCallback(async (credentials: LoginDTO) => {
-    setLoading(true);
-    setErrorMessage(null);
+      try {
+        const user = await AuthService.login(credentials);
 
-    try {
-      const user = await AuthService.login(credentials);
+        if (!user.accessToken) {
+          return;
+        }
 
-      if (!user.accessToken) {
-        return;
+        applySession(user.accessToken, false);
+        router.replace("/(private)/students/home");
+      } catch (error) {
+        handleError(error);
+      } finally {
+        setLoading(false);
       }
-
-      router.replace("/(private)/students/home");
-    } catch (error) {
-      handleError(error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    },
+    [applySession],
+  );
 
   const loginWithGoogle = useCallback(async () => {
     setLoading(true);
@@ -68,12 +78,13 @@ function useAuth() {
 
     try {
       await AuthService.logout();
+      clearSession();
 
-      router.replace("/login");
+      router.replace("/(auth)/login");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [clearSession]);
 
   return {
     register,

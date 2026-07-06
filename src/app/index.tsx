@@ -6,16 +6,19 @@ import OnboardingScreen from "../presentation/shared/screens/OverviewScreen";
 const home: React.FC = () => {
   const { loading, session, firstAccess } = useSession();
 
+  console.log("session", session);
+  console.log("firstAccess", firstAccess);
+
   if (loading) {
-    // screen loading
+    return null;
   }
 
   if (session) {
-    // return <Redirect href="/home" />;
+    return <Redirect href="/(private)/students/home" />;
   }
 
-  if (!firstAccess && firstAccess !== null) {
-    return <Redirect href="/login" />;
+  if (!firstAccess) {
+    return <Redirect href="/(auth)/login" />;
   }
 
   return (

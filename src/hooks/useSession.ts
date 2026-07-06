@@ -12,7 +12,11 @@ function useSession() {
     throw new Error("useSession deve ser usado dentro de SessionProvider");
   }
 
-  return context;
+  return {
+    session: context.session,
+    firstAccess: context.firstAccess,
+    loading: context.loading,
+  };
 }
 
 export { useSession };

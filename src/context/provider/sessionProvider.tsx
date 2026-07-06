@@ -1,5 +1,4 @@
-import { router } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { STORAGE_KEYS, StorageService } from "@/core/service/storageService";
 import { SessionContext } from "../model/sessionContext";
 
@@ -12,51 +11,49 @@ function SessionProvider({ children }: Props) {
   const [firstAccess, setFirstAccess] = useState<boolean>(true);
   const [loading, setLoading] = useState(true);
 
-  const loadSession = useCallback(async () => {
-    try {
-      const token = await StorageService.get<string>(STORAGE_KEYS.AUTH_TOKEN);
-
-      if (!token) {
-        router.replace("/login");
-        return;
-      }
-
-      setSession(token);
-    } finally {
-      setLoading(false);
-    }
+  const applySession = useCallback((sessionToken: string, firstAccessValue: boolean) => {
+    setSession(sessionToken);
+    setFirstAccess(firstAccessValue);
   }, []);
 
-  const getFirstAccess = useCallback(async () => {
+  const clearSession = useCallback(() => {
+    setSession(null);
+    setFirstAccess(true);
+  }, []);
+
+  const refreshSession = useCallback(async () => {
+    setLoading(true);
+
     try {
-      const firstAccessInfo = await StorageService.get<boolean>(STORAGE_KEYS.FIRST_ACCESS);
+      const [storedSession, storedFirstAccess] = await Promise.all([
+        StorageService.get<string>(STORAGE_KEYS.AUTH_TOKEN),
+        StorageService.get<boolean>(STORAGE_KEYS.FIRST_ACCESS),
+      ]);
 
-      if (!firstAccessInfo || firstAccessInfo === null) {
-        router.replace("/");
-        return;
-      }
-
-      setFirstAccess(firstAccessInfo);
+      setSession(storedSession);
+      setFirstAccess(storedFirstAccess ?? true);
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    const handlesession = async () => {
-      setLoading(true);
-      await Promise.all([loadSession, getFirstAccess]);
-      setLoading(false);
-    };
+    void refreshSession();
+  }, [refreshSession]);
 
-    handlesession();
-  }, [getFirstAccess, loadSession]);
-
-  return (
-    <SessionContext.Provider value={{ session, loading, firstAccess }}>
-      {children}
-    </SessionContext.Provider>
+  const value = useMemo(
+    () => ({
+      session,
+      loading,
+      firstAccess,
+      refreshSession,
+      applySession,
+      clearSession,
+    }),
+    [session, loading, firstAccess, refreshSession, applySession, clearSession],
   );
+
+  return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
 }
 
 export { SessionProvider };

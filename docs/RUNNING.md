@@ -3,33 +3,6 @@
 
 Este documento descreve o processo de configuração e execução do ambiente de desenvolvimento do Rota Fácil, incluindo instalação de dependências, inicialização da aplicação e validações obrigatórias utilizadas durante o desenvolvimento.
 
-# Requisitos do Ambiente
-
-```txt
-┌───────────┐    ┌───────────┐    ┌───────────┐
-│  Node.js  │───▶│    npm    │───▶│   Expo    │
-└───────────┘    └───────────┘    └───────────┘
-       │                                   │
-       ▼                                   ▼
-┌───────────────┐               ┌────────────────┐
-│ Android Studio│               │     Xcode      │
-└───────────────┘               └────────────────┘
-```
-
-O projeto utiliza como base o ecossistema Node.js com Expo para desenvolvimento mobile.
-
-Antes da execução do projeto, o ambiente deve possuir:
-
-* Node.js em versão LTS;
-* npm instalado;
-* Git configurado;
-* Android Studio para execução Android;
-* Xcode para execução iOS em ambientes macOS;
-* Expo CLI disponível via `npx`.
-
-A utilização de versões desatualizadas do Node.js pode gerar incompatibilidades com dependências do projeto, problemas de build e falhas em bibliotecas nativas.
-
-<br/>
 
 ### Clone do Repositório
 
@@ -74,163 +47,18 @@ A pasta `node_modules` será criada automaticamente após a instalação.
 
 ### Inicialização do Projeto
 
-```txt
-┌─────────────────┐
-│  npm run dev    │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ Metro Bundler   │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ Ambiente Expo   │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ Bundle React    │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ Android / iOS   │
-└─────────────────┘
-```
-
 Após a instalação das dependências, a aplicação pode ser iniciada em ambiente de desenvolvimento.
+
 
 ```bash
 npm run dev
 ```
 
-Em projetos Expo, este comando normalmente inicia:
-
-* servidor Metro;
-* empacotamento da aplicação;
-* ambiente de desenvolvimento React Native;
-* ferramentas de debug.
-
-Caso o script `dev` não esteja configurado, a execução pode ser realizada diretamente com Expo:
-
-```bash
-npx expo start
-```
-
-Este comando inicia o servidor responsável por:
-
-* geração do bundle da aplicação;
-* atualização em tempo real;
-* integração com emuladores;
-* conexão com Expo Go;
-* suporte a desenvolvimento multiplataforma.
-
-<br/>
-<br/>
-
-### Execução Android
-
-```txt
-┌──────────────┐
-│  Expo CLI    │
-└──────┬───────┘
-       │
-       ▼
-┌──────────────┐
-│ Build Android│
-└──────┬───────┘
-       │
-       ▼
-┌──────────────┐
-│ Dependências │
-│    Nativas   │
-└──────┬───────┘
-       │
-       ▼
-┌──────────────┐
-│  Emulador    │
-└──────┬───────┘
-       │
-       ▼
-┌──────────────┐
-│ Aplicação    │
-└──────────────┘
-```
-
-Para execução Android:
-
-```bash
-npx expo run:android
-```
-
-Este processo realiza:
-
-* geração da build Android;
-* instalação das dependências nativas;
-* abertura do emulador;
-* compilação do aplicativo;
-* instalação automática no dispositivo virtual.
-
-O Android Studio deve estar corretamente configurado com:
-
-* Android SDK;
-* variáveis de ambiente;
-* emulador Android ativo.
-
-Problemas nesta etapa geralmente estão relacionados à configuração incorreta do SDK ou ausência de dispositivos virtuais.
-
-<br/>
-<br/>
-
-### Execução iOS
-
-```txt
-┌──────────────┐
-│  Expo CLI    │
-└──────┬───────┘
-       │
-       ▼
-┌──────────────┐
-│ Integração   │
-│    Xcode     │
-└──────┬───────┘
-       │
-       ▼
-┌──────────────┐
-│ Build iOS    │
-└──────┬───────┘
-       │
-       ▼
-┌──────────────┐
-│ Simulador    │
-└──────┬───────┘
-       │
-       ▼
-┌──────────────┐
-│ Aplicação    │
-└──────────────┘
-```
-
-Para execução iOS:
-
-```bash
-npx expo run:ios
-```
-
-A execução iOS exige:
-
-* macOS;
-* Xcode instalado;
-* simuladores configurados.
-
 Durante a primeira execução, o sistema pode instalar dependências adicionais necessárias para compilação nativa.
 
 
 
-
-Navegue pela documentação : 
+### Navegue pela documentação : 
 
 📌 [Overview](../README.md)   
 📌 [Como contribuir](./docs/CONTRIBUTING.md)   

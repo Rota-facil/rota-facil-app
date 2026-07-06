@@ -1,7 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
-import { StorageError } from "@/errors/storageError";
+import { StorageError } from "@/errors/errors";
 import { STORAGE_KEYS, StorageService } from "../core/service/storageService";
 
+/**
+ * Hook responsável por recuperar dados persistidos de sessão no storage.
+ * Carrega token e informação de primeiro acesso, expondo loading e erro local.
+ * Use apenas quando a tela precisar ler diretamente o storage; para sessão viva,
+ * prefira useSession.
+ **/
 export function useStorage() {
   const [token, setToken] = useState<string | null>(null);
   const [firstAccess, setFirstAccess] = useState<boolean | null>(true);

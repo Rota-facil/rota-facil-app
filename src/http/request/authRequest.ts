@@ -18,7 +18,7 @@ export const AuthRequest = {
 
   async deactivate(accesToken: string): Promise<void> {
     return httpClient.patch<void>("/auth/deactivate", {
-      headers: { Autorization: `Bearer ${accesToken}` },
+      headers: { Authorization: `Bearer ${accesToken}` },
     });
   },
 };

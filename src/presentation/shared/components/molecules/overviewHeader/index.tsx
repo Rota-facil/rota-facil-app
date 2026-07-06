@@ -1,7 +1,4 @@
-import { LinearGradient } from "expo-linear-gradient";
-import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
-import Svg, { Circle, Rect } from "react-native-svg";
 import EasyRouteLogo from "../../atoms/logo";
 
 interface OnboardingHeaderProps {

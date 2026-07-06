@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
-import { TextInput, View } from "react-native";
+import { TextInput, type TextInputProps, View } from "react-native";
 import { colors } from "@/presentation/shared/styles/colors";
 
-interface BaseInputProps {
+interface BaseInputProps extends TextInputProps {
   value: string;
   onChangeText: (text: string) => void;
   placeholder?: string;

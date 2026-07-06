@@ -7,8 +7,9 @@ import type { LoginDTO } from "@/http/dto/loginDTO";
 import { useSessionActions } from "./useSessionActions";
 
 /**
- * Hook responsável por gerenciar e ser uma
- * ponte entre as requisições de autenticação do usuário.
+ * Hook responsável pelos fluxos de autenticação acionados pela UI.
+ * Executa register, login, login com Google e logout via AuthService,
+ * sincroniza o SessionProvider quando necessário e controla loading local.
  **/
 function useAuth() {
   const { applySession, clearSession } = useSessionActions();

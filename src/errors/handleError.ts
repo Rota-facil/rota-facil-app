@@ -6,6 +6,7 @@ function handleError(error: unknown) {
   if (error instanceof HttpServerError && error.status === 401) {
     error.handleError();
     AuthService.logout();
+    return;
   }
 
   if (

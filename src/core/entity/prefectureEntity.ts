@@ -1,17 +1,11 @@
-enum Region {
-  NORTH,
-  SOUTH,
-  SOUTHEAST,
-  WEST,
-  EAST,
-  NORTH_EAST,
-  WEST_CENTER,
-}
+type Region = string;
 
-interface PrefecturesEntity {
+interface PrefectureEntity {
   id: string;
   name: string;
   region: Region;
 }
 
-export type { PrefecturesEntity, Region };
+type PrefecturesEntity = PrefectureEntity;
+
+export type { PrefectureEntity, PrefecturesEntity, Region };

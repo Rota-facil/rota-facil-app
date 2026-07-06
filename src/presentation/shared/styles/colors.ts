@@ -16,6 +16,7 @@ export const colors = {
   textDefault: "#051223",
   textSecondary: "#5E6A7A",
   blueAccent: "#043DBC",
+  accentGlow: "#F37503",
 } as const;
 
 export type ColorKey = keyof typeof colors;

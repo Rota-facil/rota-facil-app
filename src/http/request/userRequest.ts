@@ -7,7 +7,7 @@ import { httpClient } from "../httpClient/httpClient";
 export const UserRequest = {
   async me(accesToken: string): Promise<UserDTO> {
     return httpClient.get<UserDTO>("/auth/me", {
-      headers: { Autorization: `Bearer ${accesToken}` },
+      headers: { Authorization: `Bearer ${accesToken}` },
     });
   },
 };

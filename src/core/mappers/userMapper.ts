@@ -1,5 +1,6 @@
 import type { UserDTO } from "@/http/dto/UserDTO";
 import type { UserEntity } from "../entity/userEntity";
+import { prefectureMapper } from "./prefectureMapper";
 
 const userMapper = {
   toEntity(dto: UserDTO): UserEntity {
@@ -11,7 +12,9 @@ const userMapper = {
       role: dto.role,
       completedTrips: dto.completedTrips,
       score: dto.score,
-      prefecture: dto.prefecture,
+      prefecture: prefectureMapper.toEntity(dto.prefecture),
+      active: dto.active,
+      createdAt: dto.createdAt,
     };
   },
 

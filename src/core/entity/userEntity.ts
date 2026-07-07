@@ -1,9 +1,6 @@
 import type { PrefecturesEntity } from "./prefectureEntity";
 
-enum UserRole {
-  STUDENT,
-  DRIVER,
-}
+type UserRole = "STUDENT" | "DRIVER";
 
 interface UserEntity {
   id: string;
@@ -11,9 +8,11 @@ interface UserEntity {
   email: string;
   cpf: string;
   role: UserRole;
-  completedTrips: GLfloat;
-  score: GLfloat;
+  completedTrips: number;
+  score: number;
   prefecture: PrefecturesEntity;
+  active: boolean;
+  createdAt: string;
 }
 
 export type { UserEntity, UserRole };

@@ -9,6 +9,12 @@ const PrefectureRequest = {
   async getPrefecture(prefectureId: string): Promise<PrefectureResponseDTO> {
     return httpClient.get<PrefectureResponseDTO>(`/auth/prefectures/${prefectureId}`);
   },
+
+  async changeUserPrefecture(accessToken: string, prefectureId: string): Promise<void> {
+    return httpClient.post<void>(`/auth/user/prefecture/${prefectureId}/change`, undefined, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+  },
 };
 
 export { PrefectureRequest };

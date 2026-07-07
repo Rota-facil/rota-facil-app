@@ -58,6 +58,20 @@ function usePrefecture() {
     setError(null);
   }, []);
 
+  const changeUserPrefecture = useCallback(async (prefectureId: string) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      await PrefectureService.changeUserPrefecture(prefectureId);
+    } catch (e: unknown) {
+      setError(getErrorMessage(e));
+      handleError(e);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   return {
     prefectures,
     prefecture,
@@ -65,6 +79,7 @@ function usePrefecture() {
     error,
     loadPrefectures,
     loadPrefecture,
+    changeUserPrefecture,
     clearPrefecture,
   };
 }

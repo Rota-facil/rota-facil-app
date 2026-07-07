@@ -9,14 +9,22 @@ import { config } from "./config";
  */
 const httpClient = {
   get: <T>(path: string, init?: RequestInit) => request<T>(path, { ...init, method: "GET" }),
-  post: <T>(path: string, body: unknown, init?: RequestInit) =>
-    request<T>(path, { ...init, method: "POST", body: JSON.stringify(body) }),
-  put: <T>(path: string, body: unknown, init?: RequestInit) =>
-    request<T>(path, { ...init, method: "PUT", body: JSON.stringify(body) }),
-  patch: <T>(path: string, body: unknown, init?: RequestInit) =>
-    request<T>(path, { ...init, method: "PATCH", body: JSON.stringify(body) }),
+  post: <T>(path: string, body?: unknown, init?: RequestInit) =>
+    request<T>(path, buildRequestInit("POST", body, init)),
+  put: <T>(path: string, body?: unknown, init?: RequestInit) =>
+    request<T>(path, buildRequestInit("PUT", body, init)),
+  patch: <T>(path: string, body?: unknown, init?: RequestInit) =>
+    request<T>(path, buildRequestInit("PATCH", body, init)),
   delete: <T>(path: string, init?: RequestInit) => request<T>(path, { ...init, method: "DELETE" }),
 };
+
+function buildRequestInit(method: string, body?: unknown, init?: RequestInit): RequestInit {
+  return {
+    ...init,
+    method,
+    body: body === undefined ? undefined : JSON.stringify(body),
+  };
+}
 
 export async function request<T>(path: string, init?: RequestInit): Promise<T> {
   let response: Response;
@@ -49,8 +57,24 @@ export async function request<T>(path: string, init?: RequestInit): Promise<T> {
     throw new HttpServerError(message, response.status);
   }
 
+  if (response.status === 204) {
+    return undefined as T;
+  }
+
+  let responseText: string;
+
   try {
-    return (await response.json()) as T;
+    responseText = await response.text();
+  } catch {
+    throw new HttpClientError("Falha ao processar resposta do servidor");
+  }
+
+  if (!responseText) {
+    return undefined as T;
+  }
+
+  try {
+    return JSON.parse(responseText) as T;
   } catch {
     throw new HttpClientError("Falha ao processar resposta do servidor");
   }

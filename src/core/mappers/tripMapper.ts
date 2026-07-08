@@ -76,6 +76,10 @@ const tripMapper = {
     };
   },
 
+  toSimpleTripUserEntityList(dtos: SimpleTripUserResponseDTO[]): SimpleTripUserEntity[] {
+    return dtos.map((dto) => this.toSimpleTripUserEntity(dto));
+  },
+
   toDriverEntity(dto: TripDriverResponseDTO): TripDriverEntity {
     return {
       id: dto.id,

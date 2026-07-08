@@ -18,6 +18,16 @@ interface JoinUserInTripRequestDTO {
   return_: boolean;
 }
 
+interface CancelTripRequestDTO {
+  reasonOfCancellation: string;
+}
+
+interface ProcessTripPositionParamsDTO {
+  tripId: string;
+  latitude: number;
+  longitude: number;
+}
+
 interface TripUserUserResponseDTO {
   id: string;
   name: string;
@@ -139,7 +149,9 @@ interface TripListParamsDTO {
 }
 
 export type {
+  CancelTripRequestDTO,
   JoinUserInTripRequestDTO,
+  ProcessTripPositionParamsDTO,
   SimpleTripUserResponseDTO,
   TripBusResponseDTO,
   TripDelayDTO,

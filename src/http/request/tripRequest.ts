@@ -1,5 +1,8 @@
 import type {
+  CancelTripRequestDTO,
   JoinUserInTripRequestDTO,
+  ProcessTripPositionParamsDTO,
+  SimpleTripUserResponseDTO,
   TripListParamsDTO,
   TripPageResponseDTO,
   TripResponseDTO,
@@ -22,6 +25,16 @@ function buildTripListPath(path: string, params?: TripListParamsDTO): string {
   }
 
   return `${path}?${queryParams.join("&")}`;
+}
+
+function buildProcessTripPath(params: ProcessTripPositionParamsDTO): string {
+  const queryParams = new URLSearchParams({
+    tripId: params.tripId,
+    latitude: String(params.latitude),
+    longitude: String(params.longitude),
+  });
+
+  return `/transports/trips/process?${queryParams.toString()}`;
 }
 
 const TripRequest = {
@@ -64,6 +77,37 @@ const TripRequest = {
 
   async getTrip(accessToken: string, tripId: string): Promise<TripResponseDTO> {
     return httpClient.get<TripResponseDTO>(`/transports/trips/${tripId}`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+  },
+
+  async processTripPosition(
+    accessToken: string,
+    params: ProcessTripPositionParamsDTO,
+  ): Promise<void> {
+    return httpClient.post<void>(buildProcessTripPath(params), undefined, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+  },
+
+  async initTrip(accessToken: string, tripId: string): Promise<TripResponseDTO> {
+    return httpClient.post<TripResponseDTO>(`/transports/trips/${tripId}/init`, undefined, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+  },
+
+  async cancelTrip(
+    accessToken: string,
+    tripId: string,
+    payload: CancelTripRequestDTO,
+  ): Promise<TripResponseDTO> {
+    return httpClient.post<TripResponseDTO>(`/transports/trips/${tripId}/cancel`, payload, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+  },
+
+  async getTripStudents(accessToken: string, tripId: string): Promise<SimpleTripUserResponseDTO[]> {
+    return httpClient.get<SimpleTripUserResponseDTO[]>(`/transports/trips/${tripId}/students`, {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
   },

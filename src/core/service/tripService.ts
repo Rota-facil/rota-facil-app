@@ -1,5 +1,9 @@
+import type { EvaluateUserPayload, EvaluationEntity } from "@/core/entity/evaluationEntity";
 import type {
+  CancelTripPayload,
   JoinTripPayload,
+  ProcessTripPositionPayload,
+  SimpleTripUserEntity,
   TripEntity,
   TripListParams,
   TripPageResultEntity,
@@ -7,11 +11,12 @@ import type {
 } from "@/core/entity/tripEntity";
 import { Mapper } from "@/core/mappers/mappers";
 import { TripRequest } from "@/http/request/tripRequest";
+import { UserRequest } from "@/http/request/userRequest";
 import { getRequiredAccessToken } from "./sessionTokenService";
 
 /**
- * Serviço de viagens do estudante.
- * Orquestra token, payload interno e conversão entre contratos HTTP e entidades.
+ * Serviço de viagens.
+ * Orquestra token, payloads internos e conversão entre contratos HTTP e entidades.
  */
 const TripService = {
   async joinTrip(tripId: string, payload: JoinTripPayload): Promise<TripUserEntity> {
@@ -58,6 +63,45 @@ const TripService = {
     const dto = await TripRequest.getTrip(token, tripId);
 
     return Mapper.trip.toEntity(dto);
+  },
+
+  async processTripPosition(payload: ProcessTripPositionPayload): Promise<void> {
+    const token = await getRequiredAccessToken();
+
+    await TripRequest.processTripPosition(token, payload);
+  },
+
+  async initTrip(tripId: string): Promise<TripEntity> {
+    const token = await getRequiredAccessToken();
+    const dto = await TripRequest.initTrip(token, tripId);
+
+    return Mapper.trip.toEntity(dto);
+  },
+
+  async cancelTrip(tripId: string, payload: CancelTripPayload): Promise<TripEntity> {
+    const token = await getRequiredAccessToken();
+    const dto = await TripRequest.cancelTrip(token, tripId, {
+      reasonOfCancellation: payload.reasonOfCancellation,
+    });
+
+    return Mapper.trip.toEntity(dto);
+  },
+
+  async getTripStudents(tripId: string): Promise<SimpleTripUserEntity[]> {
+    const token = await getRequiredAccessToken();
+    const dtos = await TripRequest.getTripStudents(token, tripId);
+
+    return Mapper.trip.toSimpleTripUserEntityList(dtos);
+  },
+
+  async evaluateStudent(userId: string, payload: EvaluateUserPayload): Promise<EvaluationEntity> {
+    const token = await getRequiredAccessToken();
+    const dto = await UserRequest.evaluateUser(token, userId, {
+      feedback: payload.feedback,
+      note: payload.note,
+    });
+
+    return Mapper.evaluation.toEntity(dto);
   },
 };
 

@@ -18,6 +18,16 @@ interface JoinTripPayload {
   readonly returning: boolean;
 }
 
+interface CancelTripPayload {
+  readonly reasonOfCancellation: string;
+}
+
+interface ProcessTripPositionPayload {
+  readonly tripId: string;
+  readonly latitude: number;
+  readonly longitude: number;
+}
+
 interface TripUserUserEntity {
   readonly id: string;
   readonly name: string;
@@ -121,7 +131,9 @@ interface TripListParams {
 }
 
 export type {
+  CancelTripPayload,
   JoinTripPayload,
+  ProcessTripPositionPayload,
   SimpleTripUserEntity,
   TripBusEntity,
   TripDelay,

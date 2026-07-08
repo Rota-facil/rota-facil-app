@@ -16,9 +16,9 @@ export const AuthRequest = {
 
   async googleAuth(): Promise<void> {},
 
-  async deactivate(accesToken: string): Promise<void> {
-    return httpClient.patch<void>("/auth/deactivate", {
-      headers: { Authorization: `Bearer ${accesToken}` },
+  async logout(accessToken: string): Promise<void> {
+    return httpClient.post<void>("/auth/logout", undefined, {
+      headers: { Authorization: `Bearer ${accessToken}` },
     });
   },
 };

@@ -27,21 +27,15 @@ const AuthService = {
   },
 
   async logout(): Promise<void> {
-    // Back end api in changes
+    try {
+      const token = await StorageService.get<string>(STORAGE_KEYS.AUTH_TOKEN);
 
-    // const token: string | null = await StorageService.get(
-    //   STORAGE_KEYS.AUTH_TOKEN,
-    // );
-
-    // if (token) {
-    //   try {
-    //     await AuthRequest.deactivate(token);
-    //   } catch (e) {
-    //     handleError(e);
-    //   }
-    // }
-
-    await StorageService.clear();
+      if (token) {
+        await AuthRequest.logout(token);
+      }
+    } finally {
+      await StorageService.clear();
+    }
   },
 };
 

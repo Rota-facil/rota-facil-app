@@ -79,10 +79,11 @@ function useAuth() {
 
     try {
       await AuthService.logout();
-      clearSession();
-
-      router.replace("/(auth)/login");
+    } catch (error) {
+      handleError(error);
     } finally {
+      clearSession();
+      router.replace("/(auth)/login");
       setLoading(false);
     }
   }, [clearSession]);

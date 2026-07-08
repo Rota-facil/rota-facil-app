@@ -6,9 +6,6 @@ import OnboardingScreen from "../presentation/shared/screens/OverviewScreen";
 const home: React.FC = () => {
   const { loading, session, firstAccess } = useSession();
 
-  console.log("session", session);
-  console.log("firstAccess", firstAccess);
-
   if (loading) {
     return null;
   }

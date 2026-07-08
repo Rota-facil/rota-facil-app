@@ -100,13 +100,13 @@ function StudentProfileScreen() {
                   title="Editar perfil"
                   subtitle="Atualize nome, e-mail e CPF"
                   icon="edit"
-                  onPress={() => router.push("/(private)/students/profile/edit")}
+                  onPress={() => router.navigate("/(private)/students/profile/edit")}
                 />
                 <ProfileActionItem
                   title="Trocar prefeitura"
                   subtitle="Solicite mudança de rede municipal"
                   icon="sync-alt"
-                  onPress={() => router.push("/(private)/students/profile/prefecture")}
+                  onPress={() => router.navigate("/(private)/students/profile/prefecture")}
                 />
                 <ProfileActionItem
                   title="Sair da conta"

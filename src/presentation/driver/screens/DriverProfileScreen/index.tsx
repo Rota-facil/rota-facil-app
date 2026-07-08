@@ -105,7 +105,7 @@ function DriverProfileScreen() {
                   title="Meu ônibus"
                   subtitle="Consulte o veículo associado ao seu perfil"
                   icon="directions-bus"
-                  onPress={() => router.push("/(private)/driver/profile/bus")}
+                  onPress={() => router.navigate("/(private)/driver/profile/bus")}
                 />
                 <ProfileActionItem
                   title="Sair da conta"

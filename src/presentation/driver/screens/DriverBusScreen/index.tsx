@@ -34,7 +34,7 @@ function DriverBusScreen() {
   return (
     <SafeAreaView className="flex-1 bg-[#F7FBFC]" edges={["top", "bottom"]}>
       <ScrollView
-        contentContainerStyle={{ paddingBottom: 28 }}
+        contentContainerStyle={{ paddingBottom: 132 }}
         showsVerticalScrollIndicator={false}
       >
         <LinearGradient
@@ -46,7 +46,7 @@ function DriverBusScreen() {
           <View className="flex-row items-center">
             <TouchableOpacity
               activeOpacity={0.8}
-              onPress={() => router.back()}
+              onPress={() => router.navigate("/(private)/driver/profile")}
               className="h-12 w-12 items-center justify-center rounded-full bg-white/20"
             >
               <MaterialIcons name="arrow-back" size={24} color="#FFFFFF" />

@@ -21,7 +21,7 @@ export function NotificationCard({
   return (
     <Pressable
       onPress={onPress}
-      className="w-full flex-row items-center gap-3 rounded-[20px] border p-3"
+      className="w-full flex-row items-center gap-3 rounded-[20px] p-3 shadow-lg"
       style={{
         backgroundColor: colors.surface,
         borderColor: colors.border,

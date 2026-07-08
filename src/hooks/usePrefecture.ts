@@ -15,7 +15,8 @@ function getErrorMessage(error: unknown): string {
  * Hook responsável por buscar prefeituras e expor o estado dessa operação.
  * Mantém a lista, a prefeitura selecionada, loading e erro local.
  * Use as ações expostas para carregar a lista, carregar uma prefeitura por id
- * ou limpar a prefeitura selecionada.
+ * ou limpar a prefeitura selecionada. A troca de prefeitura retorna boolean para
+ * que a tela só atualize o usuário e navegue quando a alteração for confirmada.
  **/
 function usePrefecture() {
   const [prefectures, setPrefectures] = useState<PrefectureEntity[]>([]);
@@ -64,9 +65,11 @@ function usePrefecture() {
 
     try {
       await PrefectureService.changeUserPrefecture(prefectureId);
+      return true;
     } catch (e: unknown) {
       setError(getErrorMessage(e));
       handleError(e);
+      return false;
     } finally {
       setIsLoading(false);
     }

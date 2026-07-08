@@ -11,7 +11,7 @@ const PrefectureRequest = {
   },
 
   async changeUserPrefecture(accessToken: string, prefectureId: string): Promise<void> {
-    return httpClient.post<void>(`/auth/user/prefecture/${prefectureId}/change`, undefined, {
+    return httpClient.patch<void>(`/auth/user/prefecture/${prefectureId}/change`, undefined, {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
   },

@@ -1,14 +1,13 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { useState } from "react";
-import { type Control, Controller, get } from "react-hook-form";
+import { type Control, Controller, type FieldValues, get, type Path } from "react-hook-form";
 import { FlatList, Modal, Pressable, Text, TouchableOpacity, View } from "react-native";
 import type { PrefectureEntity } from "@/core/entity/prefectureEntity";
-import type { RegisterFormSchema } from "@/presentation/shared/schemas/registerSchema";
 import { colors } from "@/presentation/shared/styles/colors";
 
-interface PrefectureSelectProps {
-  control: Control<RegisterFormSchema>;
-  name: "prefectureId";
+interface PrefectureSelectProps<T extends FieldValues> {
+  control: Control<T>;
+  name: Path<T>;
   label: string;
   placeholder: string;
   prefectures: PrefectureEntity[];
@@ -16,7 +15,7 @@ interface PrefectureSelectProps {
   error?: string | null;
 }
 
-function PrefectureSelect({
+function PrefectureSelect<T extends FieldValues>({
   control,
   name,
   label,
@@ -24,7 +23,7 @@ function PrefectureSelect({
   prefectures,
   loading = false,
   error,
-}: PrefectureSelectProps) {
+}: PrefectureSelectProps<T>) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -33,7 +32,10 @@ function PrefectureSelect({
       name={name}
       render={({ field, formState }) => {
         const fieldError = get(formState.errors, name);
-        const selectedPrefecture = prefectures.find((prefecture) => prefecture.id === field.value);
+        const selectedPrefectureId = String(field.value ?? "");
+        const selectedPrefecture = prefectures.find(
+          (prefecture) => prefecture.id === selectedPrefectureId,
+        );
 
         return (
           <View>
@@ -108,7 +110,7 @@ function PrefectureSelect({
                       </Text>
                     }
                     renderItem={({ item }) => {
-                      const isSelected = item.id === field.value;
+                      const isSelected = item.id === selectedPrefectureId;
 
                       return (
                         <TouchableOpacity

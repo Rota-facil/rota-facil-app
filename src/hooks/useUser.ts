@@ -17,6 +17,8 @@ function getErrorMessage(error: unknown): string {
  * Hook responsável por adaptar as ações de conta do usuário para a UI.
  * Expõe busca do usuário autenticado, atualização cadastral e exclusão de conta,
  * mantendo estado local de usuário, loading e erro da operação.
+ * A exclusão retorna boolean para que a apresentação só navegue após confirmação
+ * de sucesso e preserve a sessão quando o backend recusar a operação.
  */
 function useUser() {
   const { clearSession } = useSessionActions();
@@ -68,9 +70,11 @@ function useUser() {
       await UserService.deleteAccount();
       setUser(null);
       clearSession();
+      return true;
     } catch (e: unknown) {
       setError(getErrorMessage(e));
       handleError(e);
+      return false;
     } finally {
       setIsLoading(false);
     }

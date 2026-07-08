@@ -1,15 +1,8 @@
 import { useCallback, useState } from "react";
 import type { DriverEntity } from "@/core/entity/driverEntity";
 import { DriverService } from "@/core/service/driverService";
+import { getErrorMessage } from "@/errors/getErrorMessage";
 import { handleError } from "@/errors/handleError";
-
-function getErrorMessage(error: unknown): string {
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return "Não foi possível buscar os dados do motorista.";
-}
 
 function useDriver() {
   const [driver, setDriver] = useState<DriverEntity | null>(null);
@@ -26,7 +19,7 @@ function useDriver() {
 
       return data;
     } catch (e: unknown) {
-      setError(getErrorMessage(e));
+      setError(getErrorMessage(e, "Não foi possível buscar os dados do motorista."));
       handleError(e);
       return null;
     } finally {

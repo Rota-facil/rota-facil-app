@@ -1,15 +1,8 @@
 import { useCallback, useState } from "react";
 import type { BusEntity } from "@/core/entity/BusEntity";
 import { BusService } from "@/core/service/busService";
+import { getErrorMessage } from "@/errors/getErrorMessage";
 import { handleError } from "@/errors/handleError";
-
-function getErrorMessage(error: unknown): string {
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return "Não foi possível buscar os dados do ônibus.";
-}
 
 /**
  * Hook responsável por buscar dados de um ônibus e expor o estado da operação.
@@ -30,7 +23,7 @@ function useBus() {
 
       return data;
     } catch (e: unknown) {
-      setError(getErrorMessage(e));
+      setError(getErrorMessage(e, "Não foi possível buscar os dados do ônibus."));
       handleError(e);
       return null;
     } finally {

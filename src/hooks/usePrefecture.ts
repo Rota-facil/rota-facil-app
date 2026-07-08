@@ -1,15 +1,8 @@
 import { useCallback, useState } from "react";
 import type { PrefectureEntity } from "@/core/entity/prefectureEntity";
 import { PrefectureService } from "@/core/service/prefectureService";
+import { getErrorMessage } from "@/errors/getErrorMessage";
 import { handleError } from "@/errors/handleError";
-
-function getErrorMessage(error: unknown): string {
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return "Não foi possível buscar os dados da prefeitura.";
-}
 
 /**
  * Hook responsável por buscar prefeituras e expor o estado dessa operação.
@@ -32,7 +25,7 @@ function usePrefecture() {
       const data = await PrefectureService.getPrefectures();
       setPrefectures(data);
     } catch (e: unknown) {
-      setError(getErrorMessage(e));
+      setError(getErrorMessage(e, "Não foi possível buscar os dados da prefeitura."));
       handleError(e);
     } finally {
       setIsLoading(false);
@@ -47,7 +40,7 @@ function usePrefecture() {
       const data = await PrefectureService.getPrefecture(prefectureId);
       setPrefecture(data);
     } catch (e: unknown) {
-      setError(getErrorMessage(e));
+      setError(getErrorMessage(e, "Não foi possível buscar os dados da prefeitura."));
       handleError(e);
     } finally {
       setIsLoading(false);
@@ -67,7 +60,7 @@ function usePrefecture() {
       await PrefectureService.changeUserPrefecture(prefectureId);
       return true;
     } catch (e: unknown) {
-      setError(getErrorMessage(e));
+      setError(getErrorMessage(e, "Não foi possível buscar os dados da prefeitura."));
       handleError(e);
       return false;
     } finally {

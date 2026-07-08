@@ -1,3 +1,4 @@
+import type { EvaluateUserRequestDTO, EvaluateUserResponseDTO } from "../dto/evaluationDTO";
 import type { UpdateAccountRequestDTO, UserDTO } from "../dto/UserDTO";
 import { httpClient } from "../httpClient/httpClient";
 
@@ -21,5 +22,19 @@ export const UserRequest = {
     return httpClient.delete<void>("/auth", {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
+  },
+
+  async evaluateUser(
+    accessToken: string,
+    userId: string,
+    payload: EvaluateUserRequestDTO,
+  ): Promise<EvaluateUserResponseDTO> {
+    return httpClient.post<EvaluateUserResponseDTO>(
+      `/transports/users/${userId}/evaluate`,
+      payload,
+      {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      },
+    );
   },
 };

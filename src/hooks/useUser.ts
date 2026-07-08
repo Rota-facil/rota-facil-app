@@ -1,17 +1,10 @@
 import { useCallback, useState } from "react";
 import type { UserEntity } from "@/core/entity/userEntity";
 import { UserService } from "@/core/service/userService";
+import { getErrorMessage } from "@/errors/getErrorMessage";
 import { handleError } from "@/errors/handleError";
 import type { UpdateAccountRequestDTO } from "@/http/dto/UserDTO";
 import { useSessionActions } from "./useSessionActions";
-
-function getErrorMessage(error: unknown): string {
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return "Não foi possível executar a ação do usuário.";
-}
 
 /**
  * Hook responsável por adaptar as ações de conta do usuário para a UI.
@@ -36,7 +29,7 @@ function useUser() {
 
       return data;
     } catch (e: unknown) {
-      setError(getErrorMessage(e));
+      setError(getErrorMessage(e, "Não foi possível executar a ação do usuário."));
       handleError(e);
       return null;
     } finally {
@@ -54,7 +47,7 @@ function useUser() {
 
       return data;
     } catch (e: unknown) {
-      setError(getErrorMessage(e));
+      setError(getErrorMessage(e, "Não foi possível executar a ação do usuário."));
       handleError(e);
       return null;
     } finally {
@@ -72,7 +65,7 @@ function useUser() {
       clearSession();
       return true;
     } catch (e: unknown) {
-      setError(getErrorMessage(e));
+      setError(getErrorMessage(e, "Não foi possível executar a ação do usuário."));
       handleError(e);
       return false;
     } finally {

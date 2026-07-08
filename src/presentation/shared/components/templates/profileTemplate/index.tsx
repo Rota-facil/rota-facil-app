@@ -109,7 +109,7 @@ function ProfileTemplate({
     <SafeAreaView className="flex-1 bg-[#F7FBFC]" edges={["top", "bottom"]}>
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 28 }}
+        contentContainerStyle={{ paddingBottom: 132 }}
       >
         <LinearGradient
           colors={["#102A72", colors.primary, "#0476F8"]}

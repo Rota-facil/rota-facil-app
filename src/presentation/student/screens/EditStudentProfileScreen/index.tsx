@@ -77,7 +77,10 @@ function EditStudentProfileScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-[#F7FBFC]" edges={["top", "bottom"]}>
-      <ScrollView contentContainerStyle={{}} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: 132 }}
+        showsVerticalScrollIndicator={false}
+      >
         <LinearGradient
           colors={["#102A72", colors.primary, "#0476F8"]}
           start={{ x: 0, y: 0 }}
@@ -87,7 +90,7 @@ function EditStudentProfileScreen() {
           <View className="flex-row items-center gap-4">
             <TouchableOpacity
               activeOpacity={0.8}
-              onPress={() => router.back()}
+              onPress={() => router.navigate("/(private)/students/profile")}
               className="h-11 w-11 items-center justify-center rounded-full bg-white/15"
             >
               <MaterialIcons name="arrow-back" size={24} color="#FFFFFF" />

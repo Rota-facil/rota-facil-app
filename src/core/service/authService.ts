@@ -37,6 +37,10 @@ const AuthService = {
       await StorageService.clear();
     }
   },
+
+  async clearLocalSession(): Promise<void> {
+    await StorageService.clear();
+  },
 };
 
 export { AuthService };

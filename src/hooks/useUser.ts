@@ -31,6 +31,7 @@ function useUser() {
     } catch (e: unknown) {
       setError(getErrorMessage(e, "Não foi possível executar a ação do usuário."));
       handleError(e);
+
       return null;
     } finally {
       setIsLoading(false);
@@ -49,6 +50,7 @@ function useUser() {
     } catch (e: unknown) {
       setError(getErrorMessage(e, "Não foi possível executar a ação do usuário."));
       handleError(e);
+
       return null;
     } finally {
       setIsLoading(false);
@@ -67,6 +69,7 @@ function useUser() {
     } catch (e: unknown) {
       setError(getErrorMessage(e, "Não foi possível executar a ação do usuário."));
       handleError(e);
+
       return false;
     } finally {
       setIsLoading(false);

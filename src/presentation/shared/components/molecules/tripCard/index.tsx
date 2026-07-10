@@ -1,73 +1,20 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { Pressable, Text, View } from "react-native";
-import type { TripEntity, TripProgress, TripShift } from "@/core/entity/tripEntity";
+import type { TripEntity } from "@/core/entity/tripEntity";
 import { colors } from "@/presentation/shared/styles/colors";
+import {
+  formatTripTime,
+  getPrimaryBoardPointName,
+  getPrimaryInstitutionName,
+  getStatusColor,
+  getTripShiftLabel,
+  getTripStatusLabel,
+} from "./utils";
 
 interface TripCardProps {
   trip: TripEntity;
   context: "student" | "driver";
   onPress: () => void;
-}
-
-const progressLabels: Record<TripProgress, string> = {
-  NOT_STARTED: "Aguardando",
-  CANCELLED: "Cancelada",
-  STARTED: "Em andamento",
-  STARTED_FINISHED: "Ida finalizada",
-  RETURN_STARTED: "Retorno iniciado",
-  RETURN_FINISHED: "Finalizada",
-  INSTITUTION_ARRIVAL: "Na instituição",
-  BOARD_POINT_ARRIVAL: "No ponto",
-};
-
-const shiftLabels: Record<TripShift, string> = {
-  MORNING: "Manhã",
-  AFTERNOON: "Tarde",
-  NIGHT: "Noite",
-};
-
-function getTripStatusLabel(trip: TripEntity): string {
-  const lastStatus = trip.tripStatus.at(-1);
-
-  if (lastStatus) {
-    return progressLabels[lastStatus.progress];
-  }
-
-  return trip.actualStatus || "Status indisponível";
-}
-
-function getStatusColor(trip: TripEntity): { background: string; text: string; dot: string } {
-  const lastStatus = trip.tripStatus.at(-1);
-
-  if (lastStatus?.progress === "CANCELLED") {
-    return {
-      background: "bg-red-50",
-      text: "text-red-600",
-      dot: "bg-red-500",
-    };
-  }
-
-  if (lastStatus?.progress === "RETURN_FINISHED" || lastStatus?.progress === "STARTED_FINISHED") {
-    return {
-      background: "bg-emerald-50",
-      text: "text-emerald-600",
-      dot: "bg-emerald-500",
-    };
-  }
-
-  return {
-    background: "bg-blue-50",
-    text: "text-blue-700",
-    dot: "bg-blue-500",
-  };
-}
-
-function getPrimaryInstitutionName(trip: TripEntity): string {
-  return trip.route.institutions[0]?.name ?? "Instituição não informada";
-}
-
-function getPrimaryBoardPointName(trip: TripEntity): string {
-  return trip.route.boardPoints[0]?.name ?? "Ponto de embarque não informado";
 }
 
 function TripCard({ trip, context, onPress }: TripCardProps) {
@@ -84,7 +31,7 @@ function TripCard({ trip, context, onPress }: TripCardProps) {
       <View className="flex-row items-start justify-between gap-3">
         <View className="flex-1">
           <Text className="text-[11px] font-bold uppercase text-[#64748B]">
-            {shiftLabels[trip.route.shift]} · {trip.route.name}
+            {getTripShiftLabel(trip.route.shift)} · {trip.route.name}
           </Text>
           <Text className="mt-1 font-bold text-xl text-[#051223]">{trip.name}</Text>
         </View>
@@ -116,13 +63,17 @@ function TripCard({ trip, context, onPress }: TripCardProps) {
           <View className="min-h-[70px] flex-1 rounded-2xl bg-[#F8FAFC] p-3">
             <MaterialIcons name="schedule" size={18} color={colors.primaryGlow} />
             <Text className="mt-1 text-[10px] font-bold uppercase text-[#64748B]">Ida</Text>
-            <Text className="mt-0.5 font-bold text-sm text-[#051223]">{trip.route.going}</Text>
+            <Text className="mt-0.5 font-bold text-sm text-[#051223]">
+              {formatTripTime(trip.route.going)}
+            </Text>
           </View>
 
           <View className="min-h-[70px] flex-1 rounded-2xl bg-[#F8FAFC] p-3">
             <MaterialIcons name="keyboard-return" size={18} color={colors.primaryGlow} />
             <Text className="mt-1 text-[10px] font-bold uppercase text-[#64748B]">Retorno</Text>
-            <Text className="mt-0.5 font-bold text-sm text-[#051223]">{trip.route.returning}</Text>
+            <Text className="mt-0.5 font-bold text-sm text-[#051223]">
+              {formatTripTime(trip.route.returning)}
+            </Text>
           </View>
 
           <View className="min-h-[70px] flex-1 rounded-2xl bg-[#F8FAFC] p-3">

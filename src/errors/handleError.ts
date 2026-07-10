@@ -5,7 +5,11 @@ import { logError, showError } from "./showError";
 function handleError(error: unknown) {
   if (error instanceof HttpServerError && error.status === 401) {
     error.handleError();
-    AuthService.logout();
+    void AuthService.logout().catch((logoutError: unknown) => {
+      if (logoutError instanceof Error) {
+        logError(logoutError.message);
+      }
+    });
     return;
   }
 

@@ -1,10 +1,12 @@
-import { router } from "expo-router";
+import { type Href, router } from "expo-router";
 import { useCallback, useState } from "react";
 import { AuthService } from "@/core/service/authService";
 import { handleError } from "@/errors/handleError";
 import type { CreateUserDTO } from "@/http/dto/createUserDTO";
 import type { LoginDTO } from "@/http/dto/loginDTO";
 import { useSessionActions } from "./useSessionActions";
+
+const privateRoute = "/(private)" as Href;
 
 /**
  * Hook responsável pelos fluxos de autenticação acionados pela UI.
@@ -28,7 +30,7 @@ function useAuth() {
         }
 
         applySession(user.accessToken, false);
-        router.replace("/(private)/students/home");
+        router.replace(privateRoute);
       } catch (e) {
         handleError(e);
       } finally {
@@ -51,7 +53,7 @@ function useAuth() {
         }
 
         applySession(user.accessToken, false);
-        router.replace("/(private)/students/home");
+        router.replace(privateRoute);
       } catch (error) {
         handleError(error);
       } finally {
@@ -79,10 +81,11 @@ function useAuth() {
 
     try {
       await AuthService.logout();
-      clearSession();
-
-      router.replace("/(auth)/login");
+    } catch (error) {
+      handleError(error);
     } finally {
+      clearSession();
+      router.replace("/(auth)/login");
       setLoading(false);
     }
   }, [clearSession]);

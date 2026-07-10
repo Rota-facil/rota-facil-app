@@ -37,13 +37,23 @@ export default function OverviewScreen() {
           <OnboardingHeader onSkip={() => replace("/(auth)/login")} showSkip={!isLastSlide} />
         </View>
 
-        <OnboardingCard
-          title={currentSlide.title}
-          description={currentSlide.description}
-          iconName={currentSlide.iconName}
-          iconType={currentSlide.iconType}
-          gradientColors={currentSlide.gradientColors}
-        />
+        {currentSlide.iconType === "material" ? (
+          <OnboardingCard
+            title={currentSlide.title}
+            description={currentSlide.description}
+            iconName={currentSlide.iconName}
+            iconType="material"
+            gradientColors={currentSlide.gradientColors}
+          />
+        ) : (
+          <OnboardingCard
+            title={currentSlide.title}
+            description={currentSlide.description}
+            iconName={currentSlide.iconName}
+            iconType="feather"
+            gradientColors={currentSlide.gradientColors}
+          />
+        )}
 
         <View>
           <PaginationDots total={Slides.length} currentIndex={currentIndex} />

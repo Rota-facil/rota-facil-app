@@ -1,11 +1,23 @@
-export interface SlideData {
+import type { Feather, MaterialIcons } from "@expo/vector-icons";
+
+type MaterialIconName = keyof typeof MaterialIcons.glyphMap;
+type FeatherIconName = keyof typeof Feather.glyphMap;
+
+type SlideData = {
   id: number;
   title: string;
   description: string;
-  iconName: string;
-  iconType: "material" | "feather";
   gradientColors: [string, string];
-}
+} & (
+  | {
+      iconName: MaterialIconName;
+      iconType: "material";
+    }
+  | {
+      iconName: FeatherIconName;
+      iconType: "feather";
+    }
+);
 
 export const Slides: SlideData[] = [
   {

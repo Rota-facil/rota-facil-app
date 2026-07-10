@@ -1,6 +1,7 @@
 import { PrefectureRequest } from "@/http/request/prefectureRequest";
 import type { PrefectureEntity } from "../entity/prefectureEntity";
 import { Mapper } from "../mappers/mappers";
+import { getRequiredAccessToken } from "./sessionTokenService";
 
 const PrefectureService = {
   async getPrefectures(): Promise<PrefectureEntity[]> {
@@ -13,6 +14,12 @@ const PrefectureService = {
     const dto = await PrefectureRequest.getPrefecture(prefectureId);
 
     return Mapper.prefecture.toEntity(dto);
+  },
+
+  async changeUserPrefecture(prefectureId: string): Promise<void> {
+    const token = await getRequiredAccessToken();
+
+    await PrefectureRequest.changeUserPrefecture(token, prefectureId);
   },
 };
 

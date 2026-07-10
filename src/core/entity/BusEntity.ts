@@ -1,11 +1,22 @@
-import type { UserEntity } from "./userEntity";
+import type { UserRole } from "./userEntity";
+
+type BusStatus = string;
+
+interface BusDriverEntity {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+}
 
 interface BusEntity {
   id: string;
   prefectureId: string;
-  capacity: GLfloat;
+  capacity: number;
   plate: string;
-  driver: UserEntity;
+  createdAt: string;
+  driver: BusDriverEntity;
+  status: BusStatus;
 }
 
-export type { BusEntity };
+export type { BusDriverEntity, BusEntity, BusStatus };

@@ -1,21 +1,15 @@
 import { useCallback, useState } from "react";
 import type { PrefectureEntity } from "@/core/entity/prefectureEntity";
 import { PrefectureService } from "@/core/service/prefectureService";
+import { getErrorMessage } from "@/errors/getErrorMessage";
 import { handleError } from "@/errors/handleError";
-
-function getErrorMessage(error: unknown): string {
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return "Não foi possível buscar os dados da prefeitura.";
-}
 
 /**
  * Hook responsável por buscar prefeituras e expor o estado dessa operação.
  * Mantém a lista, a prefeitura selecionada, loading e erro local.
  * Use as ações expostas para carregar a lista, carregar uma prefeitura por id
- * ou limpar a prefeitura selecionada.
+ * ou limpar a prefeitura selecionada. A troca de prefeitura retorna boolean para
+ * que a tela só atualize o usuário e navegue quando a alteração for confirmada.
  **/
 function usePrefecture() {
   const [prefectures, setPrefectures] = useState<PrefectureEntity[]>([]);
@@ -31,7 +25,7 @@ function usePrefecture() {
       const data = await PrefectureService.getPrefectures();
       setPrefectures(data);
     } catch (e: unknown) {
-      setError(getErrorMessage(e));
+      setError(getErrorMessage(e, "Não foi possível buscar os dados da prefeitura."));
       handleError(e);
     } finally {
       setIsLoading(false);
@@ -46,7 +40,7 @@ function usePrefecture() {
       const data = await PrefectureService.getPrefecture(prefectureId);
       setPrefecture(data);
     } catch (e: unknown) {
-      setError(getErrorMessage(e));
+      setError(getErrorMessage(e, "Não foi possível buscar os dados da prefeitura."));
       handleError(e);
     } finally {
       setIsLoading(false);
@@ -58,6 +52,22 @@ function usePrefecture() {
     setError(null);
   }, []);
 
+  const changeUserPrefecture = useCallback(async (prefectureId: string) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      await PrefectureService.changeUserPrefecture(prefectureId);
+      return true;
+    } catch (e: unknown) {
+      setError(getErrorMessage(e, "Não foi possível buscar os dados da prefeitura."));
+      handleError(e);
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   return {
     prefectures,
     prefecture,
@@ -65,6 +75,7 @@ function usePrefecture() {
     error,
     loadPrefectures,
     loadPrefecture,
+    changeUserPrefecture,
     clearPrefecture,
   };
 }

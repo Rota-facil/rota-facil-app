@@ -1,16 +1,31 @@
-import type { PrefecturesEntity } from "@/core/entity/prefectureEntity";
-import type { UserRole } from "@/core/entity/userEntity";
+type UserRoleDTO = "STUDENT" | "DRIVER";
 
-interface UserDTO {
+interface UserPrefectureResponseDTO {
+  id: string;
+  name: string;
+  region: string;
+}
+
+interface UserResponseDTO {
   id: string;
   name: string;
   email: string;
   cpf: string;
-  role: UserRole;
-  completedTrips: GLfloat;
-  score: GLfloat;
-  prefecture: PrefecturesEntity;
+  prefecture: UserPrefectureResponseDTO;
   active: boolean;
+  completedTrips: number;
+  score: number;
+  role: UserRoleDTO;
+  createdAt: string;
 }
 
-export type { UserDTO };
+interface UpdateAccountRequestDTO {
+  prefectureId: string;
+  name: string;
+  email: string;
+  cpf: string;
+}
+
+type UserDTO = UserResponseDTO;
+
+export type { UpdateAccountRequestDTO, UserDTO, UserPrefectureResponseDTO, UserResponseDTO };

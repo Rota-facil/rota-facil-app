@@ -19,7 +19,7 @@ export const UserRequest = {
   },
 
   async deleteAccount(accessToken: string): Promise<void> {
-    return httpClient.delete<void>("/auth", {
+    return httpClient.patch<void>("/auth/deactivate", undefined, {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
   },

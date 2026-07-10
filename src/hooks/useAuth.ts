@@ -1,6 +1,7 @@
 import { type Href, router } from "expo-router";
 import { useCallback, useState } from "react";
 import { AuthService } from "@/core/service/authService";
+import { getErrorMessage } from "@/errors/getErrorMessage";
 import { handleError } from "@/errors/handleError";
 import type { CreateUserDTO } from "@/http/dto/createUserDTO";
 import type { LoginDTO } from "@/http/dto/loginDTO";
@@ -21,6 +22,7 @@ function useAuth() {
   const register = useCallback(
     async (credentials: CreateUserDTO) => {
       setLoading(true);
+      setErrorMessage(null);
 
       try {
         const user = await AuthService.register(credentials);
@@ -31,7 +33,8 @@ function useAuth() {
 
         applySession(user.accessToken, false);
         router.replace(privateRoute);
-      } catch (e) {
+      } catch (e: unknown) {
+        setErrorMessage(getErrorMessage(e, "Não foi possível criar sua conta."));
         handleError(e);
       } finally {
         setLoading(false);
@@ -54,7 +57,8 @@ function useAuth() {
 
         applySession(user.accessToken, false);
         router.replace(privateRoute);
-      } catch (error) {
+      } catch (error: unknown) {
+        setErrorMessage(getErrorMessage(error, "Não foi possível entrar na sua conta."));
         handleError(error);
       } finally {
         setLoading(false);
@@ -69,7 +73,8 @@ function useAuth() {
 
     try {
       await AuthService.google();
-    } catch (error) {
+    } catch (error: unknown) {
+      setErrorMessage(getErrorMessage(error, "Não foi possível entrar com Google."));
       handleError(error);
     } finally {
       setLoading(false);

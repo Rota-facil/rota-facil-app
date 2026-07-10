@@ -1,5 +1,7 @@
+import { router } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { STORAGE_KEYS, StorageService } from "@/core/service/storageService";
+import { setSessionExpirationHandler } from "@/errors/sessionExpirationHandler";
 import { SessionContext } from "../model/sessionContext";
 
 interface Props {
@@ -40,6 +42,13 @@ function SessionProvider({ children }: Props) {
   useEffect(() => {
     void refreshSession();
   }, [refreshSession]);
+
+  useEffect(() => {
+    return setSessionExpirationHandler(() => {
+      clearSession();
+      router.replace("/(auth)/login");
+    });
+  }, [clearSession]);
 
   const value = useMemo(
     () => ({

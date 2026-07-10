@@ -10,7 +10,7 @@ import { type LoginFormSchema, loginSchema } from "../../schemas/loginSchema";
 import { colors } from "../../styles/colors";
 
 export default function LoginScreen() {
-  const { login, loginWithGoogle, isLoading } = useAuth();
+  const { login, loginWithGoogle, isLoading, messageError } = useAuth();
 
   const form = useForm<LoginFormSchema>({
     resolver: zodResolver(loginSchema),
@@ -57,6 +57,7 @@ export default function LoginScreen() {
       <LoginForm
         control={form.control}
         loading={isLoading}
+        error={messageError}
         onSubmit={form.handleSubmit(login)}
         onGoogleLogin={loginWithGoogle}
       />

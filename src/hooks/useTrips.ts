@@ -20,7 +20,6 @@ function useTrips() {
   const [trips, setTrips] = useState<TripEntity[]>([]);
   const [tripsPage, setTripsPage] = useState<TripPageEntity | null>(null);
   const [myTrips, setMyTrips] = useState<TripEntity[]>([]);
-  const [myTripsPage, setMyTripsPage] = useState<TripPageEntity | null>(null);
   const [trip, setTrip] = useState<TripEntity | null>(null);
   const [tripUser, setTripUser] = useState<TripUserEntity | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -45,14 +44,13 @@ function useTrips() {
     }
   }, []);
 
-  const loadMyTrips = useCallback(async (params?: TripListParams) => {
+  const loadMyTrips = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const data = await TripService.getMyTrips(params);
-      setMyTrips(data.content);
-      setMyTripsPage(data.page);
+      const data = await TripService.getMyTrips();
+      setMyTrips(data);
 
       return data;
     } catch (e: unknown) {
@@ -146,7 +144,6 @@ function useTrips() {
     setTrips([]);
     setTripsPage(null);
     setMyTrips([]);
-    setMyTripsPage(null);
     setError(null);
   }, []);
 
@@ -154,7 +151,7 @@ function useTrips() {
     trips,
     tripsPage,
     myTrips,
-    myTripsPage,
+    myTripsPage: null,
     trip,
     tripUser,
     isLoading,

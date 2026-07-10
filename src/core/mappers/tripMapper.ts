@@ -138,6 +138,10 @@ const tripMapper = {
     };
   },
 
+  toEntityList(dtos: TripResponseDTO[]): TripEntity[] {
+    return dtos.map((dto) => this.toEntity(dto));
+  },
+
   toPageEntity(dto: TripPageResponseDTO): TripPageResultEntity {
     return {
       content: dto.content.map((trip) => this.toEntity(trip)),

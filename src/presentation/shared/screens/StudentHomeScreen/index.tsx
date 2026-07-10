@@ -1,5 +1,7 @@
+import { useRouter } from "expo-router";
 import { ScrollView, Text, View } from "react-native";
 
+import { QR_CODE_TYPES } from "@/core/entity/qrCodeEntity";
 import { ActionCard } from "@/presentation/shared/components/molecules/actionCard";
 import { CurrentTripCard } from "@/presentation/shared/components/molecules/currentTripCard";
 import { GreetingCard } from "@/presentation/shared/components/molecules/greetingCard";
@@ -9,7 +11,24 @@ import { colors } from "@/presentation/shared/styles/colors";
 import { StatusAlertCard } from "../../components/molecules/statusAlertCard";
 
 export default function StudentHomeScreen() {
+  const router = useRouter();
   const data = studentHomeMock;
+
+  const handleActionPress = (actionId: string) => {
+    if (actionId === "check-in") {
+      router.push({
+        pathname: "/(private)/qr-code/scan",
+        params: {
+          description: "Aponte a camera para o QR Code apresentado pelo motorista.",
+          expectedType: QR_CODE_TYPES.TRIP_CHECK_IN,
+          successDescription:
+            "O QR Code da viagem foi validado. A confirmacao sera conectada ao fluxo de check-in.",
+          successTitle: "QR Code da viagem validado",
+          title: "Escanear QR Code",
+        },
+      });
+    }
+  };
 
   return (
     <View className="flex-1" style={{ backgroundColor: colors.background }}>
@@ -40,6 +59,7 @@ export default function StudentHomeScreen() {
                 subtitle={action.subtitle}
                 icon={action.icon}
                 variant={action.variant}
+                onPress={() => handleActionPress(action.id)}
               />
             </View>
           ))}

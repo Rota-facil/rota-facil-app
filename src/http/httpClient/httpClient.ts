@@ -1,5 +1,6 @@
 import { HttpClientError, HttpServerError } from "@/errors/errors";
 import { config } from "./config";
+import { extractErrorMessage } from "./extractErrorMessage";
 
 /**
  * Cliente HTTP
@@ -26,8 +27,25 @@ function buildRequestInit(method: string, body?: unknown, init?: RequestInit): R
   };
 }
 
+function hasAuthorizationHeader(headers?: HeadersInit): boolean {
+  if (!headers) {
+    return false;
+  }
+
+  if (headers instanceof Headers) {
+    return headers.has("authorization");
+  }
+
+  if (Array.isArray(headers)) {
+    return headers.some(([key]) => key.toLowerCase() === "authorization");
+  }
+
+  return Object.keys(headers).some((key) => key.toLowerCase() === "authorization");
+}
+
 export async function request<T>(path: string, init?: RequestInit): Promise<T> {
   let response: Response;
+  const shouldExpireSession = hasAuthorizationHeader(init?.headers);
 
   try {
     response = await fetch(`${config.apiBaseUrl}${path}`, {
@@ -46,15 +64,16 @@ export async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
     try {
       const body = await response.json();
+      const bodyMessage = extractErrorMessage(body);
 
-      if (body?.message) {
-        message = body.message;
+      if (bodyMessage) {
+        message = bodyMessage;
       }
     } catch {
       // Ignora erros de parse e mantém mensagem padrão
     }
 
-    throw new HttpServerError(message, response.status);
+    throw new HttpServerError(message, response.status, shouldExpireSession);
   }
 
   if (response.status === 204) {

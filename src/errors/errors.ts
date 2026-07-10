@@ -19,6 +19,7 @@ class HttpServerError extends ApplicationError {
   constructor(
     message: string,
     public readonly status: number,
+    public readonly shouldExpireSession = false,
   ) {
     super(message);
   }

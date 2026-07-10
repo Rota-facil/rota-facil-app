@@ -9,11 +9,13 @@ import { FormInput } from "../../atoms/formInput";
 import { PasswordInput } from "../../atoms/passwordInput";
 import { PrefectureSelect } from "../../atoms/prefectureSelect";
 import { SystemButton } from "../../atoms/systemButton";
+import { FormErrorMessage } from "../../molecules/formErrorMessage";
 
 interface RegisterFormProps {
   control: Control<RegisterFormSchema>;
   prefectures: PrefectureEntity[];
   loading?: boolean;
+  error?: string | null;
   prefecturesLoading?: boolean;
   prefecturesError?: string | null;
   onSubmit: () => void;
@@ -23,6 +25,7 @@ function RegisterForm({
   control,
   prefectures,
   loading = false,
+  error,
   prefecturesLoading = false,
   prefecturesError,
   onSubmit,
@@ -63,6 +66,8 @@ function RegisterForm({
         label="SENHA"
         placeholder="Mínimo 8 caracteres"
       />
+
+      <FormErrorMessage message={error} />
 
       <View className="mt-1 gap-4">
         <SystemButton title="Criar conta" onPress={onSubmit} loading={loading} hideIcon />

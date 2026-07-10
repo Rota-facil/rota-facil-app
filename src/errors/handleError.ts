@@ -4,7 +4,7 @@ import { notifySessionExpired } from "./sessionExpirationHandler";
 import { logError, showError } from "./showError";
 
 function handleError(error: unknown) {
-  if (error instanceof HttpServerError && error.status === 401) {
+  if (error instanceof HttpServerError && error.status === 401 && error.shouldExpireSession) {
     error.handleError();
 
     void (async () => {

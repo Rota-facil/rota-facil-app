@@ -8,15 +8,23 @@ import { GoogleButton } from "../../atoms/googleButton";
 import { PasswordInput } from "../../atoms/passwordInput";
 import { SystemButton } from "../../atoms/systemButton";
 import { SystemLink } from "../../atoms/systemLink";
+import { FormErrorMessage } from "../../molecules/formErrorMessage";
 
 interface LoginFormProps {
   control: Control<LoginFormSchema>;
   loading?: boolean;
+  error?: string | null;
   onSubmit: () => void;
   onGoogleLogin: () => void;
 }
 
-export function LoginForm({ control, loading = false, onSubmit, onGoogleLogin }: LoginFormProps) {
+export function LoginForm({
+  control,
+  loading = false,
+  error,
+  onSubmit,
+  onGoogleLogin,
+}: LoginFormProps) {
   return (
     <View className="flex flex-col flex-1 p-5">
       <View className="flex mt-8 flex-col gap-7">
@@ -39,6 +47,8 @@ export function LoginForm({ control, loading = false, onSubmit, onGoogleLogin }:
       <View className="self-end my-3">
         <SystemLink href="/">Esqueceu a senha?</SystemLink>
       </View>
+
+      <FormErrorMessage message={error} />
 
       <View className="mt-8 flex flex-col gap-5">
         <SystemButton title="Entrar" onPress={onSubmit} loading={loading} hideIcon />

@@ -1,22 +1,99 @@
-import { MaterialIcons } from "@expo/vector-icons";
-import { Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { colors } from "@/presentation/shared/styles/colors";
+import { useRouter } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
+import type { TripEntity } from "@/core/entity/tripEntity";
+import { useTrips } from "@/hooks/useTrips";
+import { TripsPageTemplate } from "@/presentation/shared/components/organisms/tripsPageTemplate";
+
+interface DriverTripsState {
+  trips: TripEntity[];
+  isRefreshing: boolean;
+  hasLoaded: boolean;
+}
+
+const initialTripsState: DriverTripsState = {
+  trips: [],
+  isRefreshing: false,
+  hasLoaded: false,
+};
 
 function DriverTripsScreen() {
-  return (
-    <SafeAreaView className="flex-1 bg-[#F7FBFC] px-6 pt-4 pb-28" edges={["top"]}>
-      <View className="rounded-[28px] bg-white p-5 shadow-sm shadow-blue-100">
-        <View className="h-12 w-12 items-center justify-center rounded-2xl bg-[#EAF3FF]">
-          <MaterialIcons name="directions-bus" size={26} color={colors.primaryGlow} />
-        </View>
+  const router = useRouter();
+  const { isLoading, error, loadMyTrips } = useTrips();
+  const [tripsState, setTripsState] = useState<DriverTripsState>(initialTripsState);
 
-        <Text className="mt-5 font-bold text-2xl text-[#051223]">Viagens</Text>
-        <Text className="mt-2 text-[#5E6A7A] leading-5">
-          Nenhuma viagem operacional atribuida ao motorista no momento.
-        </Text>
-      </View>
-    </SafeAreaView>
+  const loadTripsList = useCallback(async () => {
+    setTripsState((currentState) => ({
+      ...currentState,
+      isRefreshing: currentState.trips.length > 0,
+    }));
+
+    const response = await loadMyTrips();
+
+    if (response) {
+      setTripsState({
+        trips: response,
+        isRefreshing: false,
+        hasLoaded: true,
+      });
+
+      return;
+    }
+
+    setTripsState((currentState) => ({
+      ...currentState,
+      isRefreshing: false,
+      hasLoaded: true,
+    }));
+  }, [loadMyTrips]);
+
+  useEffect(() => {
+    if (tripsState.hasLoaded || tripsState.isRefreshing) {
+      return;
+    }
+
+    void loadTripsList();
+  }, [loadTripsList, tripsState.hasLoaded, tripsState.isRefreshing]);
+
+  const handleRefresh = useCallback(() => {
+    void loadTripsList();
+  }, [loadTripsList]);
+
+  const handleRetry = useCallback(() => {
+    setTripsState((currentState) => ({
+      ...currentState,
+      trips: [],
+      hasLoaded: false,
+    }));
+
+    void loadTripsList();
+  }, [loadTripsList]);
+
+  const handleTripPress = useCallback(
+    (tripId: string) => {
+      router.push({
+        pathname: "/(private)/driver/trips/[tripId]",
+        params: { tripId },
+      });
+    },
+    [router],
+  );
+
+  return (
+    <TripsPageTemplate
+      trips={tripsState.trips}
+      context="driver"
+      isInitialLoading={isLoading && tripsState.trips.length === 0}
+      isRefreshing={tripsState.isRefreshing}
+      isLoadingMore={false}
+      hasReachedEnd={tripsState.hasLoaded}
+      error={error}
+      emptyTitle="Nenhuma viagem atribuída"
+      emptyDescription="As viagens programadas para sua condução aparecerão aqui."
+      onRefresh={handleRefresh}
+      onLoadMore={() => undefined}
+      onRetry={handleRetry}
+      onTripPress={handleTripPress}
+    />
   );
 }
 

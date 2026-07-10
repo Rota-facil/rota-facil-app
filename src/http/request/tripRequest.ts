@@ -66,13 +66,10 @@ const TripRequest = {
     });
   },
 
-  async getMyTrips(accessToken: string, params?: TripListParamsDTO): Promise<TripPageResponseDTO> {
-    return httpClient.get<TripPageResponseDTO>(
-      buildTripListPath("/transports/trips/my-trips", params),
-      {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      },
-    );
+  async getMyTrips(accessToken: string): Promise<TripResponseDTO[]> {
+    return httpClient.get<TripResponseDTO[]>("/transports/trips/my-trips", {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
   },
 
   async getTrip(accessToken: string, tripId: string): Promise<TripResponseDTO> {

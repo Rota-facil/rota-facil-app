@@ -51,11 +51,11 @@ const TripService = {
     return Mapper.trip.toPageEntity(dto);
   },
 
-  async getMyTrips(params?: TripListParams): Promise<TripPageResultEntity> {
+  async getMyTrips(): Promise<TripEntity[]> {
     const token = await getRequiredAccessToken();
-    const dto = await TripRequest.getMyTrips(token, params);
+    const dto = await TripRequest.getMyTrips(token);
 
-    return Mapper.trip.toPageEntity(dto);
+    return Mapper.trip.toEntityList(dto);
   },
 
   async getTrip(tripId: string): Promise<TripEntity> {

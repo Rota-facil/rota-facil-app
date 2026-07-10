@@ -15,6 +15,7 @@ function DriverPrivateLayout() {
       <Tabs.Screen name="map/index" />
       <Tabs.Screen name="notifications/index" />
       <Tabs.Screen name="profile/index" />
+      <Tabs.Screen name="trips/[tripId]/index" options={{ href: null }} />
       <Tabs.Screen name="profile/bus/index" options={{ href: null }} />
     </Tabs>
   );

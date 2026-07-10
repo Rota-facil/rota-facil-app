@@ -15,6 +15,7 @@ function StudentPrivateLayout() {
       <Tabs.Screen name="map/index" />
       <Tabs.Screen name="notifications/index" />
       <Tabs.Screen name="profile/index" />
+      <Tabs.Screen name="trips/[tripId]/index" options={{ href: null }} />
       <Tabs.Screen name="profile/edit/index" options={{ href: null }} />
       <Tabs.Screen name="profile/prefecture/index" options={{ href: null }} />
     </Tabs>

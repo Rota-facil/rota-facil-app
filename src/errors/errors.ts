@@ -57,6 +57,28 @@ class SoftError extends ApplicationError {
   }
 }
 
+type QrCodeErrorCode =
+  | "EMPTY_CONTENT"
+  | "MALFORMED_CONTENT"
+  | "EXTERNAL_CONTENT"
+  | "UNSUPPORTED_VERSION"
+  | "INCOMPATIBLE_TYPE"
+  | "INVALID_IDENTIFIER"
+  | "INCOMPATIBLE_IDENTIFIER"
+  | "CAMERA_PERMISSION_DENIED"
+  | "CAMERA_PERMISSION_BLOCKED"
+  | "UNKNOWN";
+
+class QrCodeError extends SoftError {
+  constructor(
+    public readonly code: QrCodeErrorCode,
+    message: string,
+  ) {
+    super(message);
+    this.name = "QrCodeError";
+  }
+}
+
 /**
  * We will use this error when we want to just log data to the sentry/crashlytics but not show user any popup
  * For example, on listing screen, we are calling a secondary api to load ad, it
@@ -84,4 +106,5 @@ class StorageError extends ApplicationError {
   }
 }
 
-export { BackgroundError, HttpClientError, HttpServerError, SoftError, StorageError };
+export type { QrCodeErrorCode };
+export { BackgroundError, HttpClientError, HttpServerError, QrCodeError, SoftError, StorageError };

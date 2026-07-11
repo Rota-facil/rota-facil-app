@@ -1,5 +1,7 @@
 import { useLocalSearchParams } from "expo-router";
-import { QR_CODE_TYPES, type QrCodeType } from "@/core/entity/qrCodeEntity";
+import { useCallback } from "react";
+import { QR_CODE_TYPES, type QrCodeScanResult, type QrCodeType } from "@/core/entity/qrCodeEntity";
+import { useTrips } from "@/hooks/useTrips";
 import { QrCodeScannerScreen } from "@/presentation/shared/screens/QrCodeScannerScreen";
 
 function getParamValue(value: string | string[] | undefined): string | undefined {
@@ -21,6 +23,7 @@ function getExpectedType(value: string | string[] | undefined): QrCodeType | und
 }
 
 function QrCodeScanPage() {
+  const { checkInTrip } = useTrips();
   const params = useLocalSearchParams<{
     description?: string;
     expectedTripId?: string;
@@ -29,6 +32,21 @@ function QrCodeScanPage() {
     successTitle?: string;
     title?: string;
   }>();
+  const expectedType = getExpectedType(params.expectedType);
+  const expectedTripId = getParamValue(params.expectedTripId);
+
+  const handleResult = useCallback(
+    async (result: QrCodeScanResult) => {
+      if (result.type !== QR_CODE_TYPES.TRIP_CHECK_IN || !result.tripId) {
+        return false;
+      }
+
+      const checkedInTrip = await checkInTrip(result.tripId);
+
+      return Boolean(checkedInTrip);
+    },
+    [checkInTrip],
+  );
 
   return (
     <QrCodeScannerScreen
@@ -36,8 +54,9 @@ function QrCodeScanPage() {
       description={getParamValue(params.description)}
       successTitle={getParamValue(params.successTitle)}
       successDescription={getParamValue(params.successDescription)}
-      expectedType={getExpectedType(params.expectedType)}
-      expectedTripId={getParamValue(params.expectedTripId)}
+      expectedType={expectedType}
+      expectedTripId={expectedTripId}
+      onResult={expectedType === QR_CODE_TYPES.TRIP_CHECK_IN ? handleResult : undefined}
     />
   );
 }

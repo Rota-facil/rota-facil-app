@@ -1,7 +1,7 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { useIsFocused } from "@react-navigation/native";
 import { useRouter } from "expo-router";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Linking, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import type { ParseQrCodeOptions, QrCodeScanResult } from "@/core/entity/qrCodeEntity";
@@ -16,7 +16,9 @@ interface QrCodeScannerScreenProps extends ParseQrCodeOptions {
   readonly description?: string;
   readonly successTitle?: string;
   readonly successDescription?: string;
-  readonly onResult?: (result: QrCodeScanResult) => void;
+  readonly onResult?: (
+    result: QrCodeScanResult,
+  ) => boolean | undefined | Promise<boolean | undefined>;
 }
 
 function QrCodeScannerScreen({
@@ -48,6 +50,9 @@ function QrCodeScannerScreen({
     expectedType,
     isEnabled: isFocused,
   });
+  const [resultActionStatus, setResultActionStatus] = useState<
+    "idle" | "processing" | "success" | "error"
+  >("idle");
 
   useEffect(() => {
     if (isFocused && permissionStatus === "granted" && scannerStatus === "idle") {
@@ -61,11 +66,40 @@ function QrCodeScannerScreen({
     }
 
     deliveredResultRef.current = result;
-    onResult?.(result);
+
+    if (!onResult) {
+      setResultActionStatus("success");
+      return;
+    }
+
+    let isMounted = true;
+
+    setResultActionStatus("processing");
+
+    void Promise.resolve(onResult(result))
+      .then((wasHandled) => {
+        if (!isMounted) {
+          return;
+        }
+
+        setResultActionStatus(wasHandled === false ? "error" : "success");
+      })
+      .catch(() => {
+        if (!isMounted) {
+          return;
+        }
+
+        setResultActionStatus("error");
+      });
+
+    return () => {
+      isMounted = false;
+    };
   }, [onResult, result]);
 
   const handleRetry = () => {
     deliveredResultRef.current = null;
+    setResultActionStatus("idle");
     resetScan();
   };
 
@@ -213,7 +247,36 @@ function QrCodeScannerScreen({
             </View>
           ) : null}
 
-          {result ? (
+          {result && resultActionStatus === "processing" ? (
+            <View className="rounded-[28px] bg-white p-5 shadow-sm shadow-blue-100">
+              <ActivityIndicator size="large" color={colors.primaryGlow} />
+              <Text className="mt-5 text-center font-bold text-2xl text-[#051223]">
+                Registrando check-in
+              </Text>
+              <Text className="mt-2 text-center text-[#5E6A7A] leading-5">
+                O QR Code foi validado. Aguarde enquanto confirmamos a presença.
+              </Text>
+            </View>
+          ) : null}
+
+          {result && resultActionStatus === "error" ? (
+            <View className="rounded-[28px] bg-white p-5 shadow-sm shadow-blue-100">
+              <View className="h-12 w-12 items-center justify-center rounded-2xl bg-red-50">
+                <MaterialIcons name="error-outline" size={26} color={colors.stateError} />
+              </View>
+              <Text className="mt-5 font-bold text-2xl text-[#051223]">
+                Não foi possível registrar
+              </Text>
+              <Text className="mt-2 text-[#5E6A7A] leading-5">
+                O QR Code foi lido, mas o check-in não foi confirmado. Tente novamente.
+              </Text>
+              <View className="mt-6">
+                <SystemButton title="Tentar novamente" iconLeft="refresh" onPress={handleRetry} />
+              </View>
+            </View>
+          ) : null}
+
+          {result && resultActionStatus === "success" ? (
             <View className="rounded-[28px] bg-white p-5 shadow-sm shadow-blue-100">
               <View className="h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50">
                 <MaterialIcons name="check" size={26} color={colors.stateSuccess} />

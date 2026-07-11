@@ -32,7 +32,7 @@ const progressLabels: Record<TripProgress, string> = {
   NOT_STARTED: "Aguardando",
   CANCELLED: "Cancelada",
   STARTED: "Em andamento",
-  STARTED_FINISHED: "Ida finalizada",
+  STARTED_FINISHED: "Aguardando retorno",
   RETURN_STARTED: "Retorno iniciado",
   RETURN_FINISHED: "Finalizada",
   INSTITUTION_ARRIVAL: "Na instituição",
@@ -67,14 +67,16 @@ function isTripNotStarted(trip: TripEntity): boolean {
   return getCurrentProgress(trip) === "NOT_STARTED";
 }
 
+function isTripWaitingReturn(trip: TripEntity): boolean {
+  return getCurrentProgress(trip) === "STARTED_FINISHED";
+}
+
 function isTripCancelled(trip: TripEntity): boolean {
   return getCurrentProgress(trip) === "CANCELLED";
 }
 
 function isTripFinished(trip: TripEntity): boolean {
-  const progress = getCurrentProgress(trip);
-
-  return progress === "RETURN_FINISHED" || progress === "STARTED_FINISHED";
+  return getCurrentProgress(trip) === "RETURN_FINISHED";
 }
 
 function isTripInProgress(trip: TripEntity): boolean {
@@ -161,15 +163,16 @@ function getTripDetailsPermissions(params: {
   const isStudent = params.context === "student";
   const isJoinedStudent = isStudent && params.isStudentJoined === true;
   const notStarted = isTripNotStarted(params.trip);
+  const waitingReturn = isTripWaitingReturn(params.trip);
   const inProgress = isTripInProgress(params.trip);
   const finished = isTripFinished(params.trip);
   const cancelled = isTripCancelled(params.trip);
 
   return {
-    canStartTrip: isDriver && notStarted,
-    canCancelTrip: isDriver && (notStarted || inProgress),
+    canStartTrip: isDriver && (notStarted || waitingReturn),
+    canCancelTrip: isDriver && (notStarted || inProgress || waitingReturn),
     canJoinTrip: isStudent && !params.isStudentJoined && notStarted && !cancelled,
-    canLeaveTrip: isJoinedStudent && (notStarted || inProgress),
+    canLeaveTrip: isJoinedStudent && (notStarted || inProgress || waitingReturn),
     canCheckIn: isJoinedStudent && inProgress && params.studentPresence !== "CHECKIN" && !cancelled,
     canShowCheckInQrCode: isDriver && inProgress,
     canOpenNavigation: isDriver && inProgress,
@@ -193,4 +196,5 @@ export {
   isTripFinished,
   isTripInProgress,
   isTripNotStarted,
+  isTripWaitingReturn,
 };

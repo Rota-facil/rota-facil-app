@@ -21,7 +21,10 @@ import {
   type TripDetailsTab,
   TripDetailsTemplate,
 } from "@/presentation/shared/components/templates/tripDetailsTemplate";
-import { getTripDetailsPermissions } from "@/presentation/shared/components/templates/tripDetailsTemplate/utils";
+import {
+  getTripDetailsPermissions,
+  isTripWaitingReturn,
+} from "@/presentation/shared/components/templates/tripDetailsTemplate/utils";
 import { colors } from "@/presentation/shared/styles/colors";
 
 interface DriverTripDetailsScreenProps {
@@ -34,6 +37,7 @@ function DriverActions({
   canShowCheckInQrCode,
   canStartTrip,
   isLoading,
+  startTripTitle,
   onCancelTrip,
   onOpenNavigation,
   onShowQrCode,
@@ -44,6 +48,7 @@ function DriverActions({
   readonly canShowCheckInQrCode: boolean;
   readonly canStartTrip: boolean;
   readonly isLoading: boolean;
+  readonly startTripTitle: string;
   readonly onCancelTrip: () => void;
   readonly onOpenNavigation: () => void;
   readonly onShowQrCode: () => void;
@@ -59,7 +64,7 @@ function DriverActions({
 
       {canStartTrip ? (
         <SystemButton
-          title="Iniciar viagem"
+          title={startTripTitle}
           iconLeft="play-arrow"
           loading={isLoading}
           onPress={onStartTrip}
@@ -94,6 +99,21 @@ function DriverActions({
           onPress={onCancelTrip}
         />
       ) : null}
+    </View>
+  );
+}
+
+function DriverOperationAlert({ message }: { readonly message: string }) {
+  return (
+    <View className="flex-row items-start rounded-[24px] border border-[#FECACA] bg-[#FEF2F2] p-4 shadow-sm shadow-blue-100">
+      <View className="h-10 w-10 items-center justify-center rounded-full bg-white">
+        <MaterialIcons name="error-outline" size={22} color={colors.stateError} />
+      </View>
+
+      <View className="ml-3 flex-1">
+        <Text className="text-[11px] font-bold uppercase text-[#B91C1C]">Viagem não iniciada</Text>
+        <Text className="mt-1 text-sm text-[#7F1D1D] leading-5">{message}</Text>
+      </View>
     </View>
   );
 }
@@ -379,9 +399,11 @@ function DriverTripDetailsScreen({ tripId }: DriverTripDetailsScreenProps) {
   const { error: tripError, isLoading: isTripLoading, loadTrip, trip } = useTrips();
   const {
     cancelTrip,
-    error: driverTripError,
+    cancelTripError,
+    evaluateStudentError,
     evaluateStudent,
     initTrip,
+    initTripError,
     isLoading: isDriverTripLoading,
     loadTripStudents,
     students,
@@ -425,6 +447,7 @@ function DriverTripDetailsScreen({ tripId }: DriverTripDetailsScreenProps) {
           trip,
         })
       : null;
+  const startTripTitle = trip && isTripWaitingReturn(trip) ? "Iniciar retorno" : "Iniciar viagem";
   const isLoading = (isTripLoading || isUserLoading) && !trip;
   const isActionLoading = isDriverTripLoading;
 
@@ -499,17 +522,24 @@ function DriverTripDetailsScreen({ tripId }: DriverTripDetailsScreenProps) {
         onEvaluateStudent={setSelectedStudent}
         roleActions={
           permissions ? (
-            <DriverActions
-              canCancelTrip={permissions.canCancelTrip}
-              canOpenNavigation={permissions.canOpenNavigation}
-              canShowCheckInQrCode={permissions.canShowCheckInQrCode}
-              canStartTrip={permissions.canStartTrip}
-              isLoading={isActionLoading}
-              onCancelTrip={() => setIsCancelModalVisible(true)}
-              onOpenNavigation={() => router.push("/(private)/driver/map")}
-              onShowQrCode={() => setIsQrCodeModalVisible(true)}
-              onStartTrip={handleStartTrip}
-            />
+            <View className="gap-3">
+              {permissions.canStartTrip && initTripError ? (
+                <DriverOperationAlert message={initTripError} />
+              ) : null}
+
+              <DriverActions
+                canCancelTrip={permissions.canCancelTrip}
+                canOpenNavigation={permissions.canOpenNavigation}
+                canShowCheckInQrCode={permissions.canShowCheckInQrCode}
+                canStartTrip={permissions.canStartTrip}
+                isLoading={isActionLoading}
+                startTripTitle={startTripTitle}
+                onCancelTrip={() => setIsCancelModalVisible(true)}
+                onOpenNavigation={() => router.push("/(private)/driver/map")}
+                onShowQrCode={() => setIsQrCodeModalVisible(true)}
+                onStartTrip={handleStartTrip}
+              />
+            </View>
           ) : null
         }
       />
@@ -517,7 +547,7 @@ function DriverTripDetailsScreen({ tripId }: DriverTripDetailsScreenProps) {
       <CancelTripModal
         visible={isCancelModalVisible}
         loading={isActionLoading}
-        error={driverTripError}
+        error={cancelTripError}
         onClose={() => setIsCancelModalVisible(false)}
         onSubmit={handleCancelTrip}
       />
@@ -533,7 +563,7 @@ function DriverTripDetailsScreen({ tripId }: DriverTripDetailsScreenProps) {
       <EvaluateStudentModal
         student={selectedStudent}
         loading={isActionLoading}
-        error={driverTripError}
+        error={evaluateStudentError}
         onClose={() => setSelectedStudent(null)}
         onSubmit={handleEvaluateStudent}
       />

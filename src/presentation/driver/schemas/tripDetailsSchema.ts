@@ -4,7 +4,7 @@ const cancelDriverTripSchema = z.object({
   reasonOfCancellation: z
     .string("Motivo obrigatório")
     .trim()
-    .min(400, "Informe ao menos 400 caracteres")
+    .min(60, "Informe ao menos 60 caracteres")
     .max(600, "Informe no máximo 600 caracteres"),
 });
 

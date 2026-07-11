@@ -1,10 +1,10 @@
 import { useLocalSearchParams } from "expo-router";
-import { TripDetailsPlaceholderScreen } from "@/presentation/shared/screens/TripDetailsPlaceholderScreen";
+import DriverTripDetailsScreen from "@/presentation/driver/screens/DriverTripDetailsScreen";
 
 function DriverTripDetailsPage() {
   const { tripId } = useLocalSearchParams<{ tripId: string }>();
 
-  return <TripDetailsPlaceholderScreen tripId={tripId} context="driver" />;
+  return <DriverTripDetailsScreen tripId={tripId} />;
 }
 
 export default DriverTripDetailsPage;

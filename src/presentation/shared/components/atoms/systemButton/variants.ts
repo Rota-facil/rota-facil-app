@@ -23,9 +23,9 @@ const SYSTEM_BUTTON_VARIANTS = {
   },
 
   disabled: {
-    gradient: ["#94A3B8", "#CBD5E1"] as const,
-    text: "#FFFFFF",
-    icon: "#FFFFFF",
+    gradient: ["#E2E8F0", "#CBD5E1"] as const,
+    text: "#475569",
+    icon: "#475569",
     shadow: "transparent",
   },
 };

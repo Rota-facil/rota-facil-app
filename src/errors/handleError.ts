@@ -1,11 +1,30 @@
 import { AuthService } from "@/core/service/authService";
 import { BackgroundError, HttpClientError, HttpServerError, SoftError } from "./errors";
+import { notifySessionExpired } from "./sessionExpirationHandler";
 import { logError, showError } from "./showError";
 
 function handleError(error: unknown) {
-  if (error instanceof HttpServerError && error.status === 401) {
+  if (error instanceof HttpServerError && error.status === 401 && error.shouldExpireSession) {
     error.handleError();
-    AuthService.logout();
+
+    void (async () => {
+      try {
+        await AuthService.clearLocalSession();
+      } catch (sessionError: unknown) {
+        if (sessionError instanceof Error) {
+          logError(sessionError.message);
+        }
+      }
+
+      try {
+        await notifySessionExpired();
+      } catch (sessionExpirationError: unknown) {
+        if (sessionExpirationError instanceof Error) {
+          logError(sessionExpirationError.message);
+        }
+      }
+    })();
+
     return;
   }
 

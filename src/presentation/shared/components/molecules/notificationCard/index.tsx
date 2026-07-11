@@ -21,14 +21,14 @@ export function NotificationCard({
   return (
     <Pressable
       onPress={onPress}
-      className="w-full flex-row items-center gap-3 rounded-[20px] border p-3"
+      className="w-full flex-row items-center gap-3 rounded-[20px] p-3 shadow-lg"
       style={{
         backgroundColor: colors.surface,
         borderColor: colors.border,
       }}
     >
       <View
-        className="h-12 w-12 rounded-full items-center justify-center"
+        className="h-12 w-12 items-center justify-center rounded-full"
         style={{ backgroundColor: "#E5EAF0" }}
       >
         <MaterialIcons name={icon} size={20} color={colors.primaryGlow} />
@@ -36,7 +36,7 @@ export function NotificationCard({
 
       <View className="flex-1">
         <Text
-          className="text-base font-semibold"
+          className="font-semibold text-base"
           style={{ color: colors.textDefault }}
           numberOfLines={1}
         >
@@ -44,7 +44,7 @@ export function NotificationCard({
         </Text>
 
         <Text
-          className="text-xs mt-0.5 font-medium"
+          className="mt-0.5 font-medium text-xs"
           style={{ color: colors.textSecondary }}
           numberOfLines={2}
         >
@@ -52,11 +52,11 @@ export function NotificationCard({
         </Text>
       </View>
 
-      {time && (
+      {time ? (
         <Text className="text-sm" style={{ color: colors.textSecondary }}>
           {time}
         </Text>
-      )}
+      ) : null}
     </Pressable>
   );
 }

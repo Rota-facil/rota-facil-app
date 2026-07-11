@@ -1,10 +1,13 @@
-import { router } from "expo-router";
+import { type Href, router } from "expo-router";
 import { useCallback, useState } from "react";
 import { AuthService } from "@/core/service/authService";
+import { getErrorMessage } from "@/errors/getErrorMessage";
 import { handleError } from "@/errors/handleError";
 import type { CreateUserDTO } from "@/http/dto/createUserDTO";
 import type { LoginDTO } from "@/http/dto/loginDTO";
 import { useSessionActions } from "./useSessionActions";
+
+const privateRoute = "/(private)" as Href;
 
 /**
  * Hook responsável pelos fluxos de autenticação acionados pela UI.
@@ -19,6 +22,7 @@ function useAuth() {
   const register = useCallback(
     async (credentials: CreateUserDTO) => {
       setLoading(true);
+      setErrorMessage(null);
 
       try {
         const user = await AuthService.register(credentials);
@@ -28,8 +32,9 @@ function useAuth() {
         }
 
         applySession(user.accessToken, false);
-        router.replace("/(private)/students/home");
-      } catch (e) {
+        router.replace(privateRoute);
+      } catch (e: unknown) {
+        setErrorMessage(getErrorMessage(e, "Não foi possível criar sua conta."));
         handleError(e);
       } finally {
         setLoading(false);
@@ -51,8 +56,9 @@ function useAuth() {
         }
 
         applySession(user.accessToken, false);
-        router.replace("/(private)/students/home");
-      } catch (error) {
+        router.replace(privateRoute);
+      } catch (error: unknown) {
+        setErrorMessage(getErrorMessage(error, "Não foi possível entrar na sua conta."));
         handleError(error);
       } finally {
         setLoading(false);
@@ -67,7 +73,8 @@ function useAuth() {
 
     try {
       await AuthService.google();
-    } catch (error) {
+    } catch (error: unknown) {
+      setErrorMessage(getErrorMessage(error, "Não foi possível entrar com Google."));
       handleError(error);
     } finally {
       setLoading(false);
@@ -79,10 +86,11 @@ function useAuth() {
 
     try {
       await AuthService.logout();
-      clearSession();
-
-      router.replace("/(auth)/login");
+    } catch (error) {
+      handleError(error);
     } finally {
+      clearSession();
+      router.replace("/(auth)/login");
       setLoading(false);
     }
   }, [clearSession]);

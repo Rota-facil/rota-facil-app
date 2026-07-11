@@ -1,19 +1,21 @@
 import type { PrefecturesEntity } from "./prefectureEntity";
 
-enum UserRole {
-  STUDENT,
-  DRIVER,
+type UserRole = "STUDENT" | "DRIVER";
+
+interface BaseUserEntity {
+  readonly id: string;
+  readonly name: string;
+  readonly email: string;
+  readonly cpf: string;
+  readonly role: UserRole;
+  readonly completedTrips: number;
+  readonly score: number;
+  readonly prefecture: PrefecturesEntity;
+  readonly active: boolean;
 }
 
-interface UserEntity {
-  id: string;
-  name: string;
-  email: string;
-  cpf: string;
-  role: UserRole;
-  completedTrips: GLfloat;
-  score: GLfloat;
-  prefecture: PrefecturesEntity;
+interface UserEntity extends BaseUserEntity {
+  readonly createdAt: string;
 }
 
-export type { UserEntity, UserRole };
+export type { BaseUserEntity, UserEntity, UserRole };

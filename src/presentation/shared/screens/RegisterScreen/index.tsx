@@ -24,7 +24,7 @@ const defaultScrollBottomPadding = 40;
 const keyboardScrollMargin = 32;
 
 function RegisterScreen() {
-  const { register, isLoading } = useAuth();
+  const { register, isLoading, messageError } = useAuth();
   const { prefectures, isLoading: prefecturesLoading, error, loadPrefectures } = usePrefecture();
   const [scrollBottomPadding, setScrollBottomPadding] = useState(defaultScrollBottomPadding);
 
@@ -111,6 +111,7 @@ function RegisterScreen() {
                   control={form.control}
                   prefectures={prefectures}
                   loading={isLoading}
+                  error={messageError}
                   prefecturesLoading={prefecturesLoading}
                   prefecturesError={error}
                   onSubmit={form.handleSubmit(register)}

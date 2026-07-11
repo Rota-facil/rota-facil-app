@@ -1,5 +1,6 @@
 import { HttpClientError, HttpServerError } from "@/errors/errors";
 import { config } from "./config";
+import { extractErrorMessage } from "./extractErrorMessage";
 
 /**
  * Cliente HTTP
@@ -9,17 +10,42 @@ import { config } from "./config";
  */
 const httpClient = {
   get: <T>(path: string, init?: RequestInit) => request<T>(path, { ...init, method: "GET" }),
-  post: <T>(path: string, body: unknown, init?: RequestInit) =>
-    request<T>(path, { ...init, method: "POST", body: JSON.stringify(body) }),
-  put: <T>(path: string, body: unknown, init?: RequestInit) =>
-    request<T>(path, { ...init, method: "PUT", body: JSON.stringify(body) }),
-  patch: <T>(path: string, body: unknown, init?: RequestInit) =>
-    request<T>(path, { ...init, method: "PATCH", body: JSON.stringify(body) }),
+  post: <T>(path: string, body?: unknown, init?: RequestInit) =>
+    request<T>(path, buildRequestInit("POST", body, init)),
+  put: <T>(path: string, body?: unknown, init?: RequestInit) =>
+    request<T>(path, buildRequestInit("PUT", body, init)),
+  patch: <T>(path: string, body?: unknown, init?: RequestInit) =>
+    request<T>(path, buildRequestInit("PATCH", body, init)),
   delete: <T>(path: string, init?: RequestInit) => request<T>(path, { ...init, method: "DELETE" }),
 };
 
+function buildRequestInit(method: string, body?: unknown, init?: RequestInit): RequestInit {
+  return {
+    ...init,
+    method,
+    body: body === undefined ? undefined : JSON.stringify(body),
+  };
+}
+
+function hasAuthorizationHeader(headers?: HeadersInit): boolean {
+  if (!headers) {
+    return false;
+  }
+
+  if (headers instanceof Headers) {
+    return headers.has("authorization");
+  }
+
+  if (Array.isArray(headers)) {
+    return headers.some(([key]) => key.toLowerCase() === "authorization");
+  }
+
+  return Object.keys(headers).some((key) => key.toLowerCase() === "authorization");
+}
+
 export async function request<T>(path: string, init?: RequestInit): Promise<T> {
   let response: Response;
+  const shouldExpireSession = hasAuthorizationHeader(init?.headers);
 
   try {
     response = await fetch(`${config.apiBaseUrl}${path}`, {
@@ -38,19 +64,36 @@ export async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
     try {
       const body = await response.json();
+      const bodyMessage = extractErrorMessage(body);
 
-      if (body?.message) {
-        message = body.message;
+      if (bodyMessage) {
+        message = bodyMessage;
       }
     } catch {
       // Ignora erros de parse e mantém mensagem padrão
     }
 
-    throw new HttpServerError(message, response.status);
+    throw new HttpServerError(message, response.status, shouldExpireSession);
+  }
+
+  if (response.status === 204) {
+    return undefined as T;
+  }
+
+  let responseText: string;
+
+  try {
+    responseText = await response.text();
+  } catch {
+    throw new HttpClientError("Falha ao processar resposta do servidor");
+  }
+
+  if (!responseText) {
+    return undefined as T;
   }
 
   try {
-    return (await response.json()) as T;
+    return JSON.parse(responseText) as T;
   } catch {
     throw new HttpClientError("Falha ao processar resposta do servidor");
   }

@@ -19,7 +19,7 @@ export function ActionCard({ title, subtitle, icon, variant = "primary", onPress
       : ([colors.accent, colors.accentGlow] as const);
 
   return (
-    <Pressable onPress={onPress} className="w-48 h-32 active:opacity-90">
+    <Pressable onPress={onPress} className="w-full h-32 active:opacity-90 shadow-lg">
       <LinearGradient
         colors={gradient}
         start={{ x: 0, y: 0 }}

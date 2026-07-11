@@ -168,17 +168,13 @@ function DriverNotifications() {
       )}
       ItemSeparatorComponent={() => <View className="h-[10px]" />}
       renderSectionFooter={() => <View className="h-[6px]" />}
-      renderItem={({ item, section }) => {
-        const isRecent = section.title === "RECENTES";
-
+      renderItem={({ item }) => {
         return (
           <NotificationCard
             title={item.title}
             description={item.message}
             time={formatRelativeTime(item.createdAt)}
             icon={notificationIcons[item.notificationType]}
-            iconBackgroundColor={isRecent ? "#0875F5" : "#E5EAF0"}
-            iconColor={isRecent ? "#FFFFFF" : "#718096"}
           />
         );
       }}

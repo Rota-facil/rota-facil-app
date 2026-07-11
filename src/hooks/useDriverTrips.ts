@@ -23,10 +23,14 @@ function useDriverTrips() {
   const [isLoading, setIsLoading] = useState(false);
   const [isProcessingPosition, setIsProcessingPosition] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [initTripError, setInitTripError] = useState<string | null>(null);
+  const [cancelTripError, setCancelTripError] = useState<string | null>(null);
+  const [evaluateStudentError, setEvaluateStudentError] = useState<string | null>(null);
 
   const initTrip = useCallback(async (tripId: string) => {
     setIsLoading(true);
     setError(null);
+    setInitTripError(null);
 
     try {
       const data = await TripService.initTrip(tripId);
@@ -34,7 +38,10 @@ function useDriverTrips() {
 
       return data;
     } catch (e: unknown) {
-      setError(getErrorMessage(e, "Não foi possível iniciar a viagem."));
+      const message = getErrorMessage(e, "Não foi possível iniciar a viagem.");
+
+      setError(message);
+      setInitTripError(message);
       handleError(e);
       return null;
     } finally {
@@ -45,6 +52,7 @@ function useDriverTrips() {
   const cancelTrip = useCallback(async (tripId: string, payload: CancelTripPayload) => {
     setIsLoading(true);
     setError(null);
+    setCancelTripError(null);
 
     try {
       const data = await TripService.cancelTrip(tripId, payload);
@@ -52,7 +60,10 @@ function useDriverTrips() {
 
       return data;
     } catch (e: unknown) {
-      setError(getErrorMessage(e, "Não foi possível cancelar a viagem."));
+      const message = getErrorMessage(e, "Não foi possível cancelar a viagem.");
+
+      setError(message);
+      setCancelTripError(message);
       handleError(e);
       return null;
     } finally {
@@ -97,6 +108,7 @@ function useDriverTrips() {
   const evaluateStudent = useCallback(async (userId: string, payload: EvaluateUserPayload) => {
     setIsLoading(true);
     setError(null);
+    setEvaluateStudentError(null);
 
     try {
       const data = await TripService.evaluateStudent(userId, payload);
@@ -104,7 +116,10 @@ function useDriverTrips() {
 
       return data;
     } catch (e: unknown) {
-      setError(getErrorMessage(e, "Não foi possível avaliar o estudante."));
+      const message = getErrorMessage(e, "Não foi possível avaliar o estudante.");
+
+      setError(message);
+      setEvaluateStudentError(message);
       handleError(e);
       return null;
     } finally {
@@ -117,6 +132,9 @@ function useDriverTrips() {
     setStudents([]);
     setEvaluation(null);
     setError(null);
+    setInitTripError(null);
+    setCancelTripError(null);
+    setEvaluateStudentError(null);
   }, []);
 
   return {
@@ -126,6 +144,9 @@ function useDriverTrips() {
     isLoading,
     isProcessingPosition,
     error,
+    initTripError,
+    cancelTripError,
+    evaluateStudentError,
     initTrip,
     cancelTrip,
     sendTripPosition,

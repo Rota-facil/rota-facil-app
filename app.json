@@ -40,6 +40,12 @@
           }
         }
       ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Permita que o Rota Fácil use a câmera para ler QR Codes de viagens."
+        }
+      ],
       "expo-maps",
       "expo-secure-store"
     ],

@@ -4,7 +4,7 @@ const progressLabels: Record<TripProgress, string> = {
   NOT_STARTED: "Aguardando",
   CANCELLED: "Cancelada",
   STARTED: "Em andamento",
-  STARTED_FINISHED: "Ida finalizada",
+  STARTED_FINISHED: "Aguardando retorno",
   RETURN_STARTED: "Retorno iniciado",
   RETURN_FINISHED: "Finalizada",
   INSTITUTION_ARRIVAL: "Na instituição",
@@ -42,7 +42,7 @@ function getStatusColor(trip: TripEntity): { background: string; text: string; d
     };
   }
 
-  if (lastStatus?.progress === "RETURN_FINISHED" || lastStatus?.progress === "STARTED_FINISHED") {
+  if (lastStatus?.progress === "RETURN_FINISHED") {
     return {
       background: "bg-emerald-50",
       text: "text-emerald-600",

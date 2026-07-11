@@ -392,16 +392,25 @@ function DriverTripDetailsScreen({ tripId }: DriverTripDetailsScreenProps) {
   const [isQrCodeModalVisible, setIsQrCodeModalVisible] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<SimpleTripUserEntity | null>(null);
   const [hasLoadedDetails, setHasLoadedDetails] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const loadDetails = useCallback(async () => {
-    setHasLoadedDetails(false);
+  const loadDetails = useCallback(
+    async (mode: "initial" | "refresh" = "initial") => {
+      if (mode === "refresh") {
+        setIsRefreshing(true);
+      } else {
+        setHasLoadedDetails(false);
+      }
 
-    try {
-      await Promise.all([loadTrip(tripId), loadTripStudents(tripId), loadUser()]);
-    } finally {
-      setHasLoadedDetails(true);
-    }
-  }, [loadTrip, loadTripStudents, loadUser, tripId]);
+      try {
+        await Promise.all([loadTrip(tripId), loadTripStudents(tripId), loadUser()]);
+      } finally {
+        setHasLoadedDetails(true);
+        setIsRefreshing(false);
+      }
+    },
+    [loadTrip, loadTripStudents, loadUser, tripId],
+  );
 
   useEffect(() => {
     void loadDetails();
@@ -464,6 +473,14 @@ function DriverTripDetailsScreen({ tripId }: DriverTripDetailsScreenProps) {
     [evaluateStudent, loadTripStudents, selectedStudent, tripId],
   );
 
+  const handleRefresh = useCallback(() => {
+    void loadDetails("refresh");
+  }, [loadDetails]);
+
+  const handleRetry = useCallback(() => {
+    void loadDetails();
+  }, [loadDetails]);
+
   return (
     <>
       <TripDetailsTemplate
@@ -472,10 +489,12 @@ function DriverTripDetailsScreen({ tripId }: DriverTripDetailsScreenProps) {
         context="driver"
         activeTab={activeTab}
         isLoading={isLoading}
+        isRefreshing={isRefreshing}
         error={tripError}
         canEvaluateStudents={permissions?.canRateStudents}
         onBack={() => router.back()}
-        onRetry={loadDetails}
+        onRefresh={handleRefresh}
+        onRetry={handleRetry}
         onTabChange={setActiveTab}
         onEvaluateStudent={setSelectedStudent}
         roleActions={

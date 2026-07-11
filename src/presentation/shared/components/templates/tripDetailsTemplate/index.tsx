@@ -1,8 +1,8 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import type { ReactNode } from "react";
-import { ActivityIndicator, FlatList, Pressable, Text, View } from "react-native";
+import { ActivityIndicator, FlatList, Pressable, RefreshControl, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Svg, { Circle, Line, Path, Rect } from "react-native-svg";
+import Svg, { Path } from "react-native-svg";
 import type { SimpleTripUserEntity, TripEntity, TripPresence } from "@/core/entity/tripEntity";
 import { SystemButton } from "@/presentation/shared/components/atoms/systemButton";
 import { colors } from "@/presentation/shared/styles/colors";
@@ -28,10 +28,12 @@ interface TripDetailsTemplateProps {
   readonly context: TripDetailsContext;
   readonly activeTab: TripDetailsTab;
   readonly isLoading: boolean;
+  readonly isRefreshing: boolean;
   readonly error: string | null;
   readonly roleActions?: ReactNode;
   readonly canEvaluateStudents?: boolean;
   readonly onBack: () => void;
+  readonly onRefresh: () => void;
   readonly onRetry: () => void;
   readonly onTabChange: (tab: TripDetailsTab) => void;
   readonly onEvaluateStudent?: (student: SimpleTripUserEntity) => void;
@@ -73,9 +75,9 @@ function getStatusPillClasses(trip: TripEntity): {
   }
 
   return {
-    background: "bg-[#FFF7E6]",
-    text: "text-[#B45309]",
-    dot: "bg-[#F5A524]",
+    background: "bg-[#EAF3FF]",
+    text: "text-[#0D6BEE]",
+    dot: "bg-[#0D6BEE]",
   };
 }
 
@@ -101,8 +103,8 @@ function getPresenceClasses(presence: TripPresence): {
   }
 
   return {
-    background: "bg-[#FFF7E6]",
-    text: "text-[#B45309]",
+    background: "bg-[#EAF3FF]",
+    text: "text-[#0D6BEE]",
     icon: "schedule",
   };
 }
@@ -163,48 +165,51 @@ function TripMapPreview({ trip }: { readonly trip: TripEntity }) {
     <View className="overflow-hidden rounded-[28px] bg-white shadow-sm shadow-blue-100">
       <View className="h-[210px] bg-[#EAF3FF]">
         <Svg width="100%" height="100%" viewBox="0 0 360 210">
-          <Rect x="0" y="0" width="360" height="210" fill="#EAF3FF" />
-          <Path d="M10 42 H128 V0" stroke="#C7D2FE" strokeWidth="18" strokeLinecap="round" />
-          <Path d="M232 210 V126 H350" stroke="#C7D2FE" strokeWidth="18" strokeLinecap="round" />
           <Path
-            d="M0 160 H92 V72 H210 V28 H360"
-            stroke="#DDE7F3"
+            d="M-18 54 H86 C128 54 134 92 174 92 H378"
+            stroke="#D8E7F7"
             strokeWidth="14"
-            strokeLinecap="round"
-          />
-          <Path
-            d="M30 170 C95 122 128 95 175 105 C230 116 246 62 325 46"
-            stroke="#3B82F6"
-            strokeWidth="10"
             fill="none"
             strokeLinecap="round"
           />
           <Path
-            d="M30 170 C95 122 128 95 175 105 C230 116 246 62 325 46"
+            d="M-18 158 H76 C118 158 124 124 158 118 L226 98 C258 88 280 66 306 48 L378 48"
+            stroke="#D8E7F7"
+            strokeWidth="14"
+            fill="none"
+            strokeLinecap="round"
+          />
+          <Path
+            d="M38 164 C92 134 124 118 164 116 C210 114 242 82 318 50"
+            stroke="#0D6BEE"
+            strokeWidth="11"
+            fill="none"
+            strokeLinecap="round"
+          />
+          <Path
+            d="M38 164 C92 134 124 118 164 116 C210 114 242 82 318 50"
             stroke="#FFFFFF"
             strokeWidth="3"
             fill="none"
             strokeLinecap="round"
-            strokeDasharray="9 10"
-          />
-          <Circle cx="30" cy="170" r="12" fill="#16A34A" />
-          <Circle cx="325" cy="46" r="12" fill="#F5A524" />
-          <Rect x="175" y="84" width="44" height="30" rx="12" fill="#051223" />
-          <Circle cx="187" cy="116" r="4" fill="#FFFFFF" />
-          <Circle cx="207" cy="116" r="4" fill="#FFFFFF" />
-          <Line
-            x1="184"
-            y1="94"
-            x2="212"
-            y2="94"
-            stroke="#FFFFFF"
-            strokeWidth="4"
-            strokeLinecap="round"
+            strokeDasharray="8 10"
           />
         </Svg>
 
         <View className="absolute left-4 top-4 rounded-full bg-white/95 px-3 py-1.5 shadow-sm shadow-blue-100">
           <Text className="font-bold text-[11px] uppercase text-[#0D6BEE]">{statusLabel}</Text>
+        </View>
+
+        <View className="absolute bottom-[54px] left-7 h-9 w-9 items-center justify-center rounded-full bg-[#16A34A] shadow-sm shadow-blue-100">
+          <MaterialIcons name="place" size={21} color="#FFFFFF" />
+        </View>
+
+        <View className="absolute right-7 top-9 h-9 w-9 items-center justify-center rounded-full bg-[#F5A524] shadow-sm shadow-blue-100">
+          <MaterialIcons name="school" size={20} color="#051223" />
+        </View>
+
+        <View className="absolute left-[46%] top-[78px] h-14 w-14 items-center justify-center rounded-2xl bg-[#FFF4DA] shadow-sm shadow-blue-100">
+          <MaterialIcons name="directions-bus" size={32} color={colors.accentGlow} />
         </View>
 
         <View className="absolute bottom-4 left-4 right-4 rounded-3xl bg-white/95 p-4">
@@ -256,7 +261,9 @@ function TripHeader({
 
       <View className="flex-row items-start justify-between gap-3 rounded-[28px] bg-white p-5 shadow-sm shadow-blue-100">
         <View className="flex-1">
-          <Text className="text-[11px] font-bold uppercase text-[#64748B]">Status atual</Text>
+          <Text className="text-[11px] font-bold uppercase text-[#64748B]">
+            Status atual da viagem
+          </Text>
           <Text className="mt-1 font-bold text-xl text-[#051223]">{getTripStatusLabel(trip)}</Text>
           <Text className="mt-1 text-sm text-[#5E6A7A]">
             Placa {trip.bus.plate || "não informada"}
@@ -367,17 +374,29 @@ function SummaryTab({
   readonly students: SimpleTripUserEntity[];
 }) {
   const summary = getProgressSummary(students, trip.students);
+  const boardPointName = getPrimaryBoardPointName(trip);
+  const institutionName = getPrimaryInstitutionName(trip);
 
   return (
     <View className="gap-4">
-      <View className="flex-row gap-2">
-        <MetricCard icon="schedule" label="Ida" value={formatTripTime(trip.route.going)} />
-        <MetricCard icon="group" label="Alunos" value={String(summary.total)} />
-        <MetricCard
-          icon="how-to-reg"
-          label="Check-ins"
-          value={`${summary.checkedIn}/${summary.total}`}
-        />
+      <View className="rounded-[28px] bg-white p-5 shadow-sm shadow-blue-100">
+        <Text className="text-[11px] font-bold uppercase text-[#64748B]">Resumo da viagem</Text>
+        <Text className="mt-2 font-bold text-xl text-[#051223]">{trip.route.name}</Text>
+        <Text className="mt-2 text-sm text-[#5E6A7A] leading-5">
+          Esta rota sai de {boardPointName} e segue até {institutionName}. A ida está prevista para{" "}
+          {formatTripTime(trip.route.going)}, com acompanhamento do ônibus e confirmação de presença
+          pelo check-in.
+        </Text>
+
+        <View className="mt-4 flex-row gap-2">
+          <MetricCard icon="schedule" label="Ida" value={formatTripTime(trip.route.going)} />
+          <MetricCard icon="group" label="Alunos" value={String(summary.total)} />
+          <MetricCard
+            icon="how-to-reg"
+            label="Check-ins"
+            value={`${summary.checkedIn}/${summary.total}`}
+          />
+        </View>
       </View>
 
       <View className="rounded-[28px] bg-white p-5 shadow-sm shadow-blue-100">
@@ -395,14 +414,6 @@ function SummaryTab({
             </Text>
           </View>
         </View>
-      </View>
-
-      <View className="rounded-[28px] bg-white p-5 shadow-sm shadow-blue-100">
-        <Text className="text-[11px] font-bold uppercase text-[#64748B]">Rota principal</Text>
-        <Text className="mt-2 font-bold text-base text-[#051223]">
-          {getPrimaryBoardPointName(trip)}
-        </Text>
-        <Text className="mt-1 text-sm text-[#5E6A7A]">{getPrimaryInstitutionName(trip)}</Text>
       </View>
     </View>
   );
@@ -422,7 +433,34 @@ function EmptyStudentsState() {
   );
 }
 
-function StudentListItem({
+function SimpleStudentListItem({ student }: { readonly student: SimpleTripUserEntity }) {
+  const presenceClasses = getPresenceClasses(student.presence);
+
+  return (
+    <View className="flex-row items-center rounded-2xl border border-[#E5EAF0] bg-white px-4 py-3 shadow-sm shadow-blue-100">
+      <View className="h-11 w-11 items-center justify-center rounded-full bg-[#EAF3FF]">
+        <Text className="font-bold text-[#0D6BEE]">{getStudentInitials(student.user.name)}</Text>
+      </View>
+
+      <View className="ml-3 flex-1">
+        <Text className="font-bold text-base text-[#051223]" numberOfLines={1}>
+          {student.user.name}
+        </Text>
+        <Text className="mt-0.5 text-xs text-[#5E6A7A]" numberOfLines={1}>
+          {student.boardPointName}
+        </Text>
+      </View>
+
+      <View className={`rounded-full px-2.5 py-1 ${presenceClasses.background}`}>
+        <Text className={`text-[10px] font-bold ${presenceClasses.text}`}>
+          {getTripPresenceLabel(student.presence)}
+        </Text>
+      </View>
+    </View>
+  );
+}
+
+function DriverStudentListItem({
   canEvaluate,
   onEvaluate,
   student,
@@ -433,46 +471,85 @@ function StudentListItem({
 }) {
   const presenceClasses = getPresenceClasses(student.presence);
   const hasScore = student.score > 0;
+  const scoreLabel = hasScore ? `${student.score}/5` : "Sem avaliação";
 
   return (
-    <View className="rounded-[28px] border border-[#E5EAF0] bg-white p-4 shadow-sm shadow-blue-100">
-      <View className="flex-row items-start gap-3">
-        <View className="h-12 w-12 items-center justify-center rounded-full bg-[#EAF3FF]">
-          <Text className="font-bold text-[#0D6BEE]">{getStudentInitials(student.user.name)}</Text>
+    <View className="rounded-[24px] border border-[#E5EAF0] bg-white px-4 py-4 shadow-sm shadow-blue-100">
+      <View className="flex-row items-start">
+        <View className="h-12 w-12 items-center justify-center rounded-2xl bg-[#0D6BEE]">
+          <Text className="font-bold text-white">{getStudentInitials(student.user.name)}</Text>
         </View>
 
-        <View className="flex-1">
-          <Text className="font-bold text-base text-[#051223]" numberOfLines={1}>
-            {student.user.name}
-          </Text>
-          <Text className="mt-0.5 text-sm text-[#5E6A7A]" numberOfLines={2}>
-            {student.boardPointName} · {student.institutionName}
-          </Text>
-
-          <View className="mt-3 flex-row flex-wrap gap-2">
-            <View
-              className={`flex-row items-center rounded-full px-3 py-1 ${presenceClasses.background}`}
-            >
-              <MaterialIcons name={presenceClasses.icon} size={15} color={colors.foreground} />
-              <Text className={`ml-1 text-[11px] font-bold ${presenceClasses.text}`}>
-                {getTripPresenceLabel(student.presence)}
+        <View className="ml-3 flex-1">
+          <View className="flex-row items-start justify-between gap-3">
+            <View className="flex-1">
+              <Text className="font-bold text-base text-[#051223]" numberOfLines={1}>
+                {student.user.name}
+              </Text>
+              <Text className="mt-0.5 text-xs font-semibold text-[#64748B]" numberOfLines={1}>
+                {student.going && student.returning
+                  ? "Ida e retorno confirmados"
+                  : student.going
+                    ? "Somente ida"
+                    : "Somente retorno"}
               </Text>
             </View>
 
-            <View className="rounded-full bg-[#F8FAFC] px-3 py-1">
-              <Text className="text-[11px] font-bold text-[#5E6A7A]">
-                {hasScore ? `Avaliação ${student.score}/5` : "Sem avaliação"}
+            <View
+              className={`flex-row items-center rounded-full px-2.5 py-1 ${presenceClasses.background}`}
+            >
+              <MaterialIcons name={presenceClasses.icon} size={14} color={colors.foreground} />
+              <Text className={`ml-1 text-[10px] font-bold ${presenceClasses.text}`}>
+                {getTripPresenceLabel(student.presence)}
               </Text>
             </View>
           </View>
         </View>
       </View>
 
-      {canEvaluate && onEvaluate && !hasScore ? (
-        <View className="mt-4">
-          <SystemButton title="Avaliar" iconLeft="star" onPress={() => onEvaluate(student)} />
+      <View className="mt-4 border-t border-[#E5EAF0] pt-4">
+        <View className="flex-row items-start">
+          <View className="mt-0.5 h-8 w-8 items-center justify-center rounded-full bg-[#FFF4DA]">
+            <MaterialIcons name="place" size={18} color={colors.accentGlow} />
+          </View>
+          <View className="ml-3 flex-1">
+            <Text className="text-[10px] font-bold uppercase text-[#64748B]">Embarque</Text>
+            <Text className="mt-0.5 font-semibold text-sm text-[#051223]" numberOfLines={2}>
+              {student.boardPointName}
+            </Text>
+          </View>
         </View>
-      ) : null}
+
+        <View className="mt-3 flex-row items-start">
+          <View className="mt-0.5 h-8 w-8 items-center justify-center rounded-full bg-[#EAF3FF]">
+            <MaterialIcons name="school" size={18} color={colors.primaryGlow} />
+          </View>
+          <View className="ml-3 flex-1">
+            <Text className="text-[10px] font-bold uppercase text-[#64748B]">Destino</Text>
+            <Text className="mt-0.5 font-semibold text-sm text-[#051223]" numberOfLines={2}>
+              {student.institutionName}
+            </Text>
+          </View>
+        </View>
+      </View>
+
+      <View className="mt-4 flex-row items-center justify-between border-t border-[#E5EAF0] pt-3">
+        <View className="flex-row items-center">
+          <MaterialIcons name="star" size={17} color={colors.accentGlow} />
+          <Text className="ml-1.5 text-xs font-bold text-[#5E6A7A]">Avaliação {scoreLabel}</Text>
+        </View>
+
+        {canEvaluate && onEvaluate && !hasScore ? (
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => onEvaluate(student)}
+            className="flex-row items-center rounded-full bg-[#FFF4DA] px-3 py-2 active:opacity-80"
+          >
+            <MaterialIcons name="star" size={16} color={colors.accentGlow} />
+            <Text className="ml-1.5 text-xs font-bold text-[#92400E]">Avaliar</Text>
+          </Pressable>
+        ) : null}
+      </View>
     </View>
   );
 }
@@ -535,8 +612,10 @@ function TripDetailsTemplate({
   context,
   error,
   isLoading,
+  isRefreshing,
   onBack,
   onEvaluateStudent,
+  onRefresh,
   onRetry,
   onTabChange,
   roleActions,
@@ -560,6 +639,14 @@ function TripDetailsTemplate({
         keyExtractor={(student) => student.id}
         contentContainerClassName="px-6 pt-4 pb-32 gap-4"
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={onRefresh}
+            colors={[colors.primaryGlow]}
+            tintColor={colors.primaryGlow}
+          />
+        }
         ListHeaderComponent={
           <View className="gap-4">
             <TripHeader context={context} trip={trip} onBack={onBack} />
@@ -571,14 +658,22 @@ function TripDetailsTemplate({
             {activeTab === "students" && students.length === 0 ? <EmptyStudentsState /> : null}
           </View>
         }
-        renderItem={({ item }) => (
-          <StudentListItem
-            student={item}
-            canEvaluate={canEvaluateStudents}
-            onEvaluate={onEvaluateStudent}
-          />
-        )}
-        ListFooterComponent={roleActions ? <View className="mt-2">{roleActions}</View> : null}
+        renderItem={({ item }) =>
+          context === "driver" ? (
+            <DriverStudentListItem
+              student={item}
+              canEvaluate={canEvaluateStudents}
+              onEvaluate={onEvaluateStudent}
+            />
+          ) : (
+            <SimpleStudentListItem student={item} />
+          )
+        }
+        ListFooterComponent={
+          roleActions && activeTab === "summary" ? (
+            <View className="mt-2">{roleActions}</View>
+          ) : null
+        }
       />
     </SafeAreaView>
   );

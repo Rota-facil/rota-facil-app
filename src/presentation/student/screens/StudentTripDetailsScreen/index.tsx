@@ -5,7 +5,11 @@ import { useCallback, useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { FlatList, Modal, Pressable, Text, View } from "react-native";
 import { QR_CODE_TYPES } from "@/core/entity/qrCodeEntity";
-import type { TripLocationEntity } from "@/core/entity/tripEntity";
+import type {
+  SimpleTripUserEntity,
+  TripEntity,
+  TripLocationEntity,
+} from "@/core/entity/tripEntity";
 import { useDriverTrips } from "@/hooks/useDriverTrips";
 import { useTrips } from "@/hooks/useTrips";
 import { useUser } from "@/hooks/useUser";
@@ -63,6 +67,7 @@ function StudentActions({
         <SystemButton
           title="Entrar na viagem"
           iconLeft="person-add"
+          variant="primary"
           loading={isLoading}
           onPress={onJoinTrip}
         />
@@ -72,6 +77,7 @@ function StudentActions({
         <SystemButton
           title="Fazer check-in"
           iconLeft="qr-code-scanner"
+          variant="primary"
           disabled={isLoading}
           onPress={onCheckIn}
         />
@@ -317,6 +323,7 @@ function StudentTripDetailsScreen({ tripId }: StudentTripDetailsScreenProps) {
     exitTrip,
     isLoading: isTripLoading,
     joinTrip,
+    loadMyTrips,
     loadTrip,
     trip,
   } = useTrips();
@@ -325,16 +332,33 @@ function StudentTripDetailsScreen({ tripId }: StudentTripDetailsScreenProps) {
   const [activeTab, setActiveTab] = useState<TripDetailsTab>("summary");
   const [isJoinModalVisible, setIsJoinModalVisible] = useState(false);
   const [hasLoadedDetails, setHasLoadedDetails] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [studentTrips, setStudentTrips] = useState<TripEntity[]>([]);
 
-  const loadDetails = useCallback(async () => {
-    setHasLoadedDetails(false);
+  const loadDetails = useCallback(
+    async (mode: "initial" | "refresh" = "initial") => {
+      if (mode === "refresh") {
+        setIsRefreshing(true);
+      } else {
+        setHasLoadedDetails(false);
+      }
 
-    try {
-      await Promise.all([loadTrip(tripId), loadTripStudents(tripId), loadUser()]);
-    } finally {
-      setHasLoadedDetails(true);
-    }
-  }, [loadTrip, loadTripStudents, loadUser, tripId]);
+      try {
+        const [, , , loadedStudentTrips] = await Promise.all([
+          loadTrip(tripId),
+          loadTripStudents(tripId),
+          loadUser(),
+          loadMyTrips(),
+        ]);
+
+        setStudentTrips(loadedStudentTrips ?? []);
+      } finally {
+        setHasLoadedDetails(true);
+        setIsRefreshing(false);
+      }
+    },
+    [loadMyTrips, loadTrip, loadTripStudents, loadUser, tripId],
+  );
 
   useEffect(() => {
     void loadDetails();
@@ -343,11 +367,32 @@ function StudentTripDetailsScreen({ tripId }: StudentTripDetailsScreenProps) {
   const studentTripUser = user
     ? students.find((student) => student.user.id === user.id)
     : undefined;
+  const isStudentJoined =
+    Boolean(studentTripUser) || studentTrips.some((studentTrip) => studentTrip.id === tripId);
+  const displayStudents: SimpleTripUserEntity[] =
+    students.length > 0 || !isStudentJoined || !user || !trip
+      ? students
+      : [
+          {
+            id: `current-user-${user.id}`,
+            user: {
+              id: user.id,
+              name: user.name,
+              email: user.email,
+            },
+            institutionName: trip.route.institutions[0]?.name ?? "Instituição não informada",
+            boardPointName: trip.route.boardPoints[0]?.name ?? "Ponto de embarque não informado",
+            presence: studentTripUser?.presence ?? "PENDING",
+            score: user.score,
+            going: true,
+            returning: true,
+          },
+        ];
   const permissions =
     hasLoadedDetails && trip && user
       ? getTripDetailsPermissions({
           context: "student",
-          isStudentJoined: Boolean(studentTripUser),
+          isStudentJoined,
           studentPresence: studentTripUser?.presence ?? null,
           trip,
         })
@@ -356,8 +401,14 @@ function StudentTripDetailsScreen({ tripId }: StudentTripDetailsScreenProps) {
   const isActionLoading = isTripLoading;
 
   const refreshAfterMutation = useCallback(async () => {
-    await Promise.all([loadTrip(tripId), loadTripStudents(tripId)]);
-  }, [loadTrip, loadTripStudents, tripId]);
+    const [, , loadedStudentTrips] = await Promise.all([
+      loadTrip(tripId),
+      loadTripStudents(tripId),
+      loadMyTrips(),
+    ]);
+
+    setStudentTrips(loadedStudentTrips ?? []);
+  }, [loadMyTrips, loadTrip, loadTripStudents, tripId]);
 
   const handleJoinTrip = useCallback(
     async (values: JoinTripFormSchema) => {
@@ -384,6 +435,14 @@ function StudentTripDetailsScreen({ tripId }: StudentTripDetailsScreenProps) {
     }
   }, [exitTrip, refreshAfterMutation, tripId]);
 
+  const handleRefresh = useCallback(() => {
+    void loadDetails("refresh");
+  }, [loadDetails]);
+
+  const handleRetry = useCallback(() => {
+    void loadDetails();
+  }, [loadDetails]);
+
   const handleCheckIn = useCallback(() => {
     router.push({
       pathname: "/(private)/qr-code/scan",
@@ -402,20 +461,22 @@ function StudentTripDetailsScreen({ tripId }: StudentTripDetailsScreenProps) {
     <>
       <TripDetailsTemplate
         trip={trip}
-        students={students}
+        students={displayStudents}
         context="student"
         activeTab={activeTab}
         isLoading={isLoading}
+        isRefreshing={isRefreshing}
         error={tripError}
         onBack={() => router.back()}
-        onRetry={loadDetails}
+        onRefresh={handleRefresh}
+        onRetry={handleRetry}
         onTabChange={setActiveTab}
         roleActions={
           permissions ? (
             <StudentActions
               canCheckIn={permissions.canCheckIn}
-              canJoinTrip={permissions.canJoinTrip}
-              canLeaveTrip={permissions.canLeaveTrip}
+              canJoinTrip={!isStudentJoined && permissions.canJoinTrip}
+              canLeaveTrip={isStudentJoined && permissions.canLeaveTrip}
               isLoading={isActionLoading}
               onCheckIn={handleCheckIn}
               onJoinTrip={() => setIsJoinModalVisible(true)}

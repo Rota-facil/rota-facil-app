@@ -1,8 +1,12 @@
 import type { TripEntity, TripLocationEntity, TripProgress } from "@/core/entity/tripEntity";
+import {
+  TripRouteProgressService,
+  type TripRouteProgressSummary,
+} from "@/core/service/tripRouteProgressService";
 
 type TripMapContext = "student" | "driver";
 type TripMapPointKind = "start" | "stop" | "institution" | "bus";
-type TripMapSelectionSource = "active" | "last-accessed";
+type TripMapSelectionSource = "active" | "last-accessed" | "linked";
 
 interface TripMapCoordinate {
   readonly latitude: number;
@@ -38,6 +42,7 @@ interface TripMapViewModel {
   readonly selectionSource: TripMapSelectionSource;
   readonly statusLabel: string;
   readonly statusStage: TripMapStatusStage;
+  readonly routeProgress: TripRouteProgressSummary;
   readonly routeFocus: TripMapRouteFocus | null;
   readonly hasStarted: boolean;
   readonly camera: TripMapCamera | null;
@@ -59,49 +64,6 @@ const progressLabels: Record<TripProgress, string> = {
   RETURN_FINISHED: "Finalizada",
   INSTITUTION_ARRIVAL: "Na instituição",
   BOARD_POINT_ARRIVAL: "No ponto",
-};
-
-const statusStages: Record<TripProgress, TripMapStatusStage> = {
-  NOT_STARTED: {
-    label: "Viagem ainda não iniciada",
-    percentage: 0,
-    stepLabel: "Etapa 0 de 4",
-  },
-  CANCELLED: {
-    label: "Viagem cancelada",
-    percentage: 0,
-    stepLabel: "Sem progresso",
-  },
-  STARTED: {
-    label: "Ida em andamento",
-    percentage: 25,
-    stepLabel: "Etapa 1 de 4",
-  },
-  BOARD_POINT_ARRIVAL: {
-    label: "Passando pelos pontos",
-    percentage: 35,
-    stepLabel: "Etapa 2 de 4",
-  },
-  INSTITUTION_ARRIVAL: {
-    label: "Chegada à instituição",
-    percentage: 50,
-    stepLabel: "Etapa 2 de 4",
-  },
-  STARTED_FINISHED: {
-    label: "Aguardando retorno",
-    percentage: 50,
-    stepLabel: "Etapa 2 de 4",
-  },
-  RETURN_STARTED: {
-    label: "Retorno em andamento",
-    percentage: 75,
-    stepLabel: "Etapa 3 de 4",
-  },
-  RETURN_FINISHED: {
-    label: "Percurso finalizado",
-    percentage: 100,
-    stepLabel: "Etapa 4 de 4",
-  },
 };
 
 const activeProgresses: TripProgress[] = [
@@ -151,6 +113,12 @@ function selectTripForMap(
 
   if (lastAccessedTrip) {
     return { trip: lastAccessedTrip, source: "last-accessed" };
+  }
+
+  const linkedTrip = trips[0];
+
+  if (linkedTrip) {
+    return { trip: linkedTrip, source: "linked" };
   }
 
   return null;
@@ -347,6 +315,19 @@ function getTripStatusLabel(trip: TripEntity): string {
   return progressLabels[progress] ?? trip.actualStatus;
 }
 
+function getStatusStage(routeProgress: TripRouteProgressSummary): TripMapStatusStage {
+  const directionLabel = routeProgress.direction === "returning" ? "Volta" : "Ida";
+
+  return {
+    label: progressLabels[routeProgress.currentProgress],
+    percentage: routeProgress.percentage,
+    stepLabel:
+      routeProgress.progressTotalPoints === 0
+        ? `${directionLabel}: sem pontos de rota`
+        : `${directionLabel}: ${routeProgress.completedPoints} de ${routeProgress.progressTotalPoints} pontos`,
+  };
+}
+
 function buildTripMapViewModel(params: {
   readonly trip: TripEntity;
   readonly selectionSource: TripMapSelectionSource;
@@ -360,7 +341,7 @@ function buildTripMapViewModel(params: {
       : routeCoordinates;
   const points = getRoutePoints(params.trip, busCoordinate);
   const camera = getCamera(busCoordinate ? [...routeCoordinates, busCoordinate] : routeCoordinates);
-  const progress = getCurrentProgress(params.trip);
+  const routeProgress = TripRouteProgressService.calculate(params.trip);
   const hasRouteGeographicData = routeCoordinates.length > 0;
   const hasBusLocation = busCoordinate !== null;
 
@@ -368,7 +349,8 @@ function buildTripMapViewModel(params: {
     trip: params.trip,
     selectionSource: params.selectionSource,
     statusLabel: getTripStatusLabel(params.trip),
-    statusStage: statusStages[progress],
+    statusStage: getStatusStage(routeProgress),
+    routeProgress,
     routeFocus: getRouteFocus(params.trip),
     hasStarted: hasTripStarted(params.trip),
     camera,

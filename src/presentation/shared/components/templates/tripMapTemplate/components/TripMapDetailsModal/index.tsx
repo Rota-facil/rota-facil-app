@@ -10,8 +10,19 @@ interface TripMapDetailsModalProps {
   readonly onClose: () => void;
 }
 
+const selectionSourceLabels: Record<TripMapViewModel["selectionSource"], string> = {
+  active: "Viagem vigente",
+  linked: "Viagem vinculada",
+  "last-accessed": "Última acessada",
+};
+
 function TripMapDetailsModal({ visible, viewModel, onClose }: TripMapDetailsModalProps) {
   const { trip } = viewModel;
+  const directionLabel = viewModel.routeProgress.direction === "returning" ? "Volta" : "Ida";
+  const pointProgressLabel =
+    viewModel.routeProgress.progressTotalPoints === 0
+      ? "Sem pontos de rota"
+      : `${viewModel.routeProgress.completedPoints}/${viewModel.routeProgress.progressTotalPoints}`;
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
@@ -45,7 +56,7 @@ function TripMapDetailsModal({ visible, viewModel, onClose }: TripMapDetailsModa
 
           <View className="mt-4 rounded-2xl bg-[#F7FBFC] p-4">
             <Text className="text-[11px] font-bold uppercase text-[#64748B]">
-              {viewModel.selectionSource === "active" ? "Viagem vigente" : "Última acessada"}
+              {selectionSourceLabels[viewModel.selectionSource]}
             </Text>
             <Text className="mt-1 font-bold text-base text-[#0D6BEE]">
               {viewModel.hasBusLocation ? viewModel.statusStage.label : "Sem posição do ônibus"}
@@ -57,10 +68,14 @@ function TripMapDetailsModal({ visible, viewModel, onClose }: TripMapDetailsModa
             <TripMapInfoTile iconName="groups" label="Alunos" value={String(trip.students)} />
             <TripMapInfoTile
               iconName="route"
-              label="Progresso"
-              value={viewModel.statusStage.stepLabel}
+              label={directionLabel}
+              value={`${viewModel.routeProgress.percentage}%`}
             />
           </View>
+
+          <Text className="mt-3 text-xs font-semibold text-[#64748B]">
+            Pontos passados: {pointProgressLabel}
+          </Text>
 
           <View className="mt-4 h-1.5 overflow-hidden rounded-full bg-[#E5EEF7]">
             <View

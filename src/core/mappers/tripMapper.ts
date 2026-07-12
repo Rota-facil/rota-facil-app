@@ -16,6 +16,7 @@ import type {
   TripBusResponseDTO,
   TripDriverResponseDTO,
   TripPageResponseDTO,
+  TripPresenceDTO,
   TripResponseDTO,
   TripRouteBoardPointResponseDTO,
   TripRouteInstitutionResponseDTO,
@@ -57,7 +58,7 @@ const tripMapper = {
       user: this.toUserEntity(dto.user),
       institution: this.toLocationEntity(dto.institution),
       boardPoint: this.toLocationEntity(dto.boardPoint),
-      presence: dto.presence,
+      presence: toPresenceEntity(dto.presence),
       going: dto.going,
       returning: dto.return_,
     };
@@ -69,7 +70,7 @@ const tripMapper = {
       user: this.toUserEntity(dto.user),
       institutionName: dto.institutionName,
       boardPointName: dto.boardPointName,
-      presence: dto.presence,
+      presence: toPresenceEntity(dto.presence),
       score: dto.score,
       going: dto.going,
       returning: dto.return_,
@@ -158,5 +159,23 @@ const tripMapper = {
     };
   },
 };
+
+function toPresenceEntity(presence: TripPresenceDTO): SimpleTripUserEntity["presence"] {
+  const normalizedPresence = presence.trim().toUpperCase();
+
+  if (normalizedPresence === "CHECK-IN" || normalizedPresence === "CHECKIN") {
+    return "CHECKIN";
+  }
+
+  if (normalizedPresence === "PENDENTE" || normalizedPresence === "PENDING") {
+    return "PENDING";
+  }
+
+  if (normalizedPresence === "AUSENTE" || normalizedPresence === "ABSENT") {
+    return "ABSENT";
+  }
+
+  return "PENDING";
+}
 
 export { tripMapper };

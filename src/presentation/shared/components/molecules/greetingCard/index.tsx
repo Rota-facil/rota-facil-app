@@ -24,12 +24,12 @@ export function GreetingCard({
   notificationIcon = "notifications-none",
 }: GreetingCardProps) {
   return (
-    <View className="w-full rounded-[32px] overflow-hidden">
+    <View className="w-full rounded-b-[10px] overflow-hidden">
       <LinearGradient
         colors={[colors.primary, colors.primaryGlow]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        className="w-full rounded-[32px] px-6 py-8 flex-row items-center justify-between"
+        className="w-full rounded-b-[10px] px-6 py-8 flex-row items-center justify-between"
       >
         <View className="flex-1 pr-4">
           <Text className="text-blue-100 uppercase text-lg ">{greeting}</Text>

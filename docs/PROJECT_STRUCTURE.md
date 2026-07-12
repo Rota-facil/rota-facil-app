@@ -236,6 +236,7 @@ Implementações que misturem responsabilidades, invertam dependências ou aumen
 ### Navegue pela documentação : 
 
 📌 [Overview](../README.md)   
-📌 [Como contribuir](./docs/CONTRIBUTING.md)   
-📌 [Como executar o projeto](./docs/RUNNING.md)   
-📌 [Principais telas do aplicativo](./docs/SCREENS.md)  
+📌 [Como contribuir](./CONTRIBUTING.md)   
+📌 [Como executar o projeto](./RUNNING.md)   
+📌 [Principais telas do aplicativo](./SCREENS.md)  
+📌 [Geração de Development Build com EAS](./EAS_BUILD.md)

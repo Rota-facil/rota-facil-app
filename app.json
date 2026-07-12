@@ -12,6 +12,7 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.rotafacil.app",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -19,7 +20,8 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": ["android.permission.CAMERA", "android.permission.RECORD_AUDIO"]
     },
     "web": {
       "bundler": "metro",
@@ -41,6 +43,14 @@
         }
       ],
       [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "O Rota Fácil utiliza sua localização para acompanhar a viagem escolar em andamento.",
+          "locationAlwaysAndWhenInUsePermission": "O Rota Fácil utiliza sua localização durante viagens ativas para compartilhar o trajeto do transporte escolar.",
+          "isAndroidBackgroundLocationEnabled": true
+        }
+      ],
+      [
         "expo-camera",
         {
           "cameraPermission": "Permita que o Rota Fácil use a câmera para ler QR Codes de viagens."
@@ -51,6 +61,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "45ff1ba1-d9ff-40df-b5e5-1c2db2bc2151"
+      }
+    },
+    "owner": "dom-gean"
   }
 }

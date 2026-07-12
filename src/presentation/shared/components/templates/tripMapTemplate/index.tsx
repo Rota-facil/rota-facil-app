@@ -1,14 +1,15 @@
 import { MaterialIcons } from "@expo/vector-icons";
+import { useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import type { TripMapContext, TripMapViewModel } from "@/hooks/tripMapModel";
 import { TripsStateView } from "@/presentation/shared/components/molecules/tripsStateView";
 import { colors } from "@/presentation/shared/styles/colors";
-import { MapOverlayButton } from "./components/MapOverlayButton";
 import { TripMapBottomSheet } from "./components/TripMapBottomSheet";
+import { TripMapDetailsModal } from "./components/TripMapDetailsModal";
 import { TripMapHeader } from "./components/TripMapHeader";
 import { TripMapUnavailableState } from "./components/TripMapUnavailableState";
 import { TripNativeMapView } from "./nativeMap/TripNativeMapView";
-import type { TripMapContext, TripMapViewModel } from "./utils";
 
 interface TripMapTemplateProps {
   readonly context: TripMapContext;
@@ -29,6 +30,8 @@ function TripMapTemplate({
   error,
   onRefresh,
 }: TripMapTemplateProps) {
+  const [isDetailsModalVisible, setIsDetailsModalVisible] = useState(false);
+
   if (isLoading && !viewModel) {
     return (
       <SafeAreaView className="flex-1 bg-[#F7FBFC] px-6 pt-4 pb-28" edges={["top"]}>
@@ -92,23 +95,27 @@ function TripMapTemplate({
               ) : null}
             </View>
 
-            <View className="absolute right-5 top-32 gap-3">
-              <MapOverlayButton
-                iconName={isRefreshing ? "hourglass-empty" : "refresh"}
-                label="Atualizar acompanhamento"
-                disabled={isRefreshing}
-                onPress={onRefresh}
-              />
-            </View>
-
-            <View className="absolute left-5 right-5 bottom-8 pb-24">
-              <TripMapBottomSheet viewModel={viewModel} />
-            </View>
+            {viewModel.hasStarted ? (
+              <View className="absolute left-5 right-5 bottom-8 pb-24">
+                <TripMapBottomSheet
+                  viewModel={viewModel}
+                  onOpenDetails={() => setIsDetailsModalVisible(true)}
+                />
+              </View>
+            ) : null}
 
             {isRefreshing ? (
               <View className="absolute left-1/2 top-1/2 -ml-6 -mt-6 h-12 w-12 items-center justify-center rounded-full bg-white shadow-sm shadow-blue-100">
                 <ActivityIndicator color={colors.primaryGlow} />
               </View>
+            ) : null}
+
+            {viewModel.hasStarted ? (
+              <TripMapDetailsModal
+                visible={isDetailsModalVisible}
+                viewModel={viewModel}
+                onClose={() => setIsDetailsModalVisible(false)}
+              />
             ) : null}
           </>
         ) : null}

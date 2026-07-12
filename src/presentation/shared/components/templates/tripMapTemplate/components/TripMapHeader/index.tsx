@@ -22,10 +22,6 @@ function TripMapHeader({ viewModel, onRefresh }: TripMapHeaderProps) {
           <Text className="font-bold text-base text-[#051223]" numberOfLines={1}>
             {trip.name || trip.route.name}
           </Text>
-          <Text className="mt-0.5 text-xs text-[#5E6A7A]" numberOfLines={1}>
-            {getTripTimeLabel(trip)}
-            {trip.bus.plate ? ` · ${trip.bus.plate}` : ""}
-          </Text>
         </View>
 
         <Pressable
@@ -38,17 +34,29 @@ function TripMapHeader({ viewModel, onRefresh }: TripMapHeaderProps) {
         </Pressable>
       </View>
 
-      <View className="mt-4 flex-row items-center justify-between gap-3">
-        <View className="min-w-0 flex-1">
-          <Text className="text-[11px] font-bold uppercase text-[#64748B]">Motorista</Text>
-          <Text className="mt-1 font-semibold text-sm text-[#051223]" numberOfLines={1}>
-            {trip.bus.driver.name || "Não informado"}
-          </Text>
+      <View className="mt-4 flex-row gap-3">
+        <View className="min-w-0 flex-1 flex-row items-center rounded-2xl bg-[#F7FBFC] px-3 py-2.5">
+          <View className="mr-2 h-8 w-8 items-center justify-center rounded-full bg-[#EAF3FF]">
+            <MaterialIcons name="schedule" size={18} color={colors.primaryGlow} />
+          </View>
+          <View className="min-w-0 flex-1">
+            <Text className="text-[10px] font-bold uppercase text-[#64748B]">Horário</Text>
+            <Text className="mt-0.5 font-bold text-xs text-[#051223]" numberOfLines={1}>
+              {getTripTimeLabel(trip)}
+            </Text>
+          </View>
         </View>
 
-        <View className="flex-row items-center rounded-full bg-emerald-50 px-3 py-2">
-          <View className="mr-2 h-2 w-2 rounded-full bg-emerald-500" />
-          <Text className="font-bold text-xs text-emerald-700">{viewModel.statusLabel}</Text>
+        <View className="min-w-0 flex-1 flex-row items-center rounded-2xl bg-[#F7FBFC] px-3 py-2.5">
+          <View className="mr-2 h-8 w-8 items-center justify-center rounded-full bg-[#FFF6E4]">
+            <MaterialIcons name="directions-bus" size={18} color={colors.accentGlow} />
+          </View>
+          <View className="min-w-0 flex-1">
+            <Text className="text-[10px] font-bold uppercase text-[#64748B]">Ônibus</Text>
+            <Text className="mt-0.5 font-bold text-xs text-[#051223]" numberOfLines={1}>
+              {trip.bus.plate || "Sem placa"}
+            </Text>
+          </View>
         </View>
       </View>
     </View>

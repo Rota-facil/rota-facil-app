@@ -1,6 +1,6 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Modal, Pressable, Text, TextInput, View } from "react-native";
@@ -30,6 +30,8 @@ import { colors } from "@/presentation/shared/styles/colors";
 interface DriverTripDetailsScreenProps {
   readonly tripId: string;
 }
+
+const TRIP_STUDENTS_REFRESH_INTERVAL_MS = 30_000;
 
 function DriverActions({
   canCancelTrip,
@@ -434,9 +436,19 @@ function DriverTripDetailsScreen({ tripId }: DriverTripDetailsScreenProps) {
     [loadTrip, loadTripStudents, loadUser, tripId],
   );
 
-  useEffect(() => {
-    void loadDetails();
-  }, [loadDetails]);
+  useFocusEffect(
+    useCallback(() => {
+      void loadDetails();
+
+      const refreshIntervalId = setInterval(() => {
+        void loadTripStudents(tripId, { silent: true });
+      }, TRIP_STUDENTS_REFRESH_INTERVAL_MS);
+
+      return () => {
+        clearInterval(refreshIntervalId);
+      };
+    }, [loadDetails, loadTripStudents, tripId]),
+  );
 
   const isAssignedDriver = Boolean(user && trip && user.id === trip.bus.driver.id);
   const permissions =

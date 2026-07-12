@@ -87,8 +87,11 @@ function useDriverTrips() {
     }
   }, []);
 
-  const loadTripStudents = useCallback(async (tripId: string) => {
-    setIsLoading(true);
+  const loadTripStudents = useCallback(async (tripId: string, options?: { silent?: boolean }) => {
+    if (!options?.silent) {
+      setIsLoading(true);
+    }
+
     setError(null);
 
     try {
@@ -101,7 +104,9 @@ function useDriverTrips() {
       handleError(e);
       return null;
     } finally {
-      setIsLoading(false);
+      if (!options?.silent) {
+        setIsLoading(false);
+      }
     }
   }, []);
 

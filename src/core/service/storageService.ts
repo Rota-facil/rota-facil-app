@@ -5,6 +5,7 @@ import { StorageError } from "../../errors/errors";
 const STORAGE_KEYS = {
   AUTH_TOKEN: "auth_token",
   FIRST_ACCESS: "first_access",
+  LAST_ACCESSED_TRIP_ID: "last_accessed_trip_id",
 } as const;
 
 type StorageKey = (typeof STORAGE_KEYS)[keyof typeof STORAGE_KEYS];

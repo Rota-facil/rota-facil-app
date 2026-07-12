@@ -6,6 +6,7 @@ import type {
   TripPageEntity,
   TripUserEntity,
 } from "@/core/entity/tripEntity";
+import { STORAGE_KEYS, StorageService } from "@/core/service/storageService";
 import { TripService } from "@/core/service/tripService";
 import { getErrorMessage } from "@/errors/getErrorMessage";
 import { handleError } from "@/errors/handleError";
@@ -69,6 +70,7 @@ function useTrips() {
     try {
       const data = await TripService.getTrip(tripId);
       setTrip(data);
+      void saveLastAccessedTripId(data.id);
 
       return data;
     } catch (e: unknown) {
@@ -165,6 +167,14 @@ function useTrips() {
     clearTrip,
     clearTrips,
   };
+}
+
+async function saveLastAccessedTripId(tripId: string): Promise<void> {
+  try {
+    await StorageService.save<string>(STORAGE_KEYS.LAST_ACCESSED_TRIP_ID, tripId);
+  } catch (error: unknown) {
+    handleError(error);
+  }
 }
 
 export { useTrips };

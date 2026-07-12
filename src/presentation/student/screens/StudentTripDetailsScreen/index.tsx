@@ -1,6 +1,6 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { FlatList, Modal, Pressable, Text, View } from "react-native";
@@ -360,9 +360,11 @@ function StudentTripDetailsScreen({ tripId }: StudentTripDetailsScreenProps) {
     [loadMyTrips, loadTrip, loadTripStudents, loadUser, tripId],
   );
 
-  useEffect(() => {
-    void loadDetails();
-  }, [loadDetails]);
+  useFocusEffect(
+    useCallback(() => {
+      void loadDetails();
+    }, [loadDetails]),
+  );
 
   const studentTripUser = user
     ? students.find((student) => student.user.id === user.id)

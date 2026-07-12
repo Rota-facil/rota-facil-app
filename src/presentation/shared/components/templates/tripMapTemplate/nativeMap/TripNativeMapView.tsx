@@ -3,8 +3,8 @@ import type { ComponentProps } from "react";
 import { useEffect, useMemo, useRef } from "react";
 import { Text, View } from "react-native";
 import MapView, { type LatLng, Marker, Polyline, type Region } from "react-native-maps";
+import type { TripMapPoint, TripMapPointKind, TripMapViewModel } from "@/hooks/tripMapModel";
 import { colors } from "@/presentation/shared/styles/colors";
-import type { TripMapPoint, TripMapPointKind, TripMapViewModel } from "../utils";
 
 interface TripNativeMapViewProps {
   readonly viewModel: TripMapViewModel;

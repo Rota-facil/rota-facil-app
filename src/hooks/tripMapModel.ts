@@ -39,6 +39,7 @@ interface TripMapViewModel {
   readonly statusLabel: string;
   readonly statusStage: TripMapStatusStage;
   readonly routeFocus: TripMapRouteFocus | null;
+  readonly hasStarted: boolean;
   readonly camera: TripMapCamera | null;
   readonly points: TripMapPoint[];
   readonly routeCoordinates: TripMapCoordinate[];
@@ -120,6 +121,12 @@ function isActiveTrip(trip: TripEntity): boolean {
 
 function isWaitingReturnTrip(trip: TripEntity): boolean {
   return getCurrentProgress(trip) === "STARTED_FINISHED";
+}
+
+function hasTripStarted(trip: TripEntity): boolean {
+  const progress = getCurrentProgress(trip);
+
+  return progress !== "NOT_STARTED" && progress !== "CANCELLED";
 }
 
 function selectTripForMap(
@@ -363,6 +370,7 @@ function buildTripMapViewModel(params: {
     statusLabel: getTripStatusLabel(params.trip),
     statusStage: statusStages[progress],
     routeFocus: getRouteFocus(params.trip),
+    hasStarted: hasTripStarted(params.trip),
     camera,
     points,
     routeCoordinates,

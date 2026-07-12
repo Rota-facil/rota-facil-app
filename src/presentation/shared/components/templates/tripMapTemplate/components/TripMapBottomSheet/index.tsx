@@ -1,5 +1,5 @@
 import { Text, View } from "react-native";
-import { getTripTimeLabel, type TripMapViewModel } from "../../utils";
+import { getTripTimeLabel, type TripMapViewModel } from "@/hooks/tripMapModel";
 import { TripMapInfoTile } from "../TripMapInfoTile";
 
 interface TripMapBottomSheetProps {

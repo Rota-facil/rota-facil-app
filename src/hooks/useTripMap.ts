@@ -11,7 +11,7 @@ import {
   mergeTripRouteFallback,
   selectTripForMap,
   type TripMapViewModel,
-} from "@/presentation/shared/components/templates/tripMapTemplate/utils";
+} from "@/hooks/tripMapModel";
 
 interface UseTripMapState {
   readonly viewModel: TripMapViewModel | null;

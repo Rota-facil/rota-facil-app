@@ -1,7 +1,7 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { Pressable, Text, View } from "react-native";
+import { getTripTimeLabel, type TripMapViewModel } from "@/hooks/tripMapModel";
 import { colors } from "@/presentation/shared/styles/colors";
-import { getTripTimeLabel, type TripMapViewModel } from "../../utils";
 
 interface TripMapHeaderProps {
   readonly viewModel: TripMapViewModel;

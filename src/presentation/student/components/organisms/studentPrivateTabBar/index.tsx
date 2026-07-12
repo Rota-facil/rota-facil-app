@@ -58,7 +58,7 @@ function StudentPrivateTabBar({ state, navigation }: BottomTabBarProps) {
 
   return (
     <View
-      className="absolute right-0 bottom-0 left-0 bg-[#F7FBFC]"
+      className="absolute right-0 bottom-0 left-0 bg-[#122344]"
       style={{ paddingBottom: Math.max(insets.bottom, 10) }}
     >
       <View className="h-[74px] flex-row items-center justify-between bg-white px-5 shadow-lg shadow-slate-300">

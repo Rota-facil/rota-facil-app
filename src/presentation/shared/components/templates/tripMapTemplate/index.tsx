@@ -69,6 +69,8 @@ function TripMapTemplate({
               ? "Quando houver uma viagem atribuída ou acessada por você, o trajeto aparecerá aqui."
               : "Quando você estiver vinculado a uma viagem, o trajeto aparecerá aqui."
           }
+          actionLabel="Atualizar"
+          onActionPress={onRefresh}
         />
       </SafeAreaView>
     );

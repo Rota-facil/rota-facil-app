@@ -1,5 +1,11 @@
 import { AuthService } from "@/core/service/authService";
-import { BackgroundError, HttpClientError, HttpServerError, SoftError } from "./errors";
+import {
+  BackgroundError,
+  HttpClientError,
+  HttpServerError,
+  SoftError,
+  StorageError,
+} from "./errors";
 import { notifySessionExpired } from "./sessionExpirationHandler";
 import { logError, showError } from "./showError";
 
@@ -32,7 +38,8 @@ function handleError(error: unknown) {
     error instanceof HttpServerError ||
     error instanceof HttpClientError ||
     error instanceof SoftError ||
-    error instanceof BackgroundError
+    error instanceof BackgroundError ||
+    error instanceof StorageError
   ) {
     error.handleError();
     return;

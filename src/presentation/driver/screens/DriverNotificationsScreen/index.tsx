@@ -1,4 +1,3 @@
-import { MaterialIcons } from "@expo/vector-icons";
 import { Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { DriverNotifications } from "@/presentation/driver/components/organisms/driverNotifications";

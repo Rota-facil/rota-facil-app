@@ -64,6 +64,21 @@ const LocationSyncQueueService = {
     return nextQueue;
   },
 
+  async removeByTripId(tripId: string): Promise<PendingLocationSyncItem[]> {
+    const normalizedTripId = tripId.trim();
+
+    if (normalizedTripId.length === 0) {
+      return this.getQueue();
+    }
+
+    const queue = await this.getQueue();
+    const nextQueue = queue.filter((item) => item.tripId !== normalizedTripId);
+
+    await this.replaceQueue(nextQueue);
+
+    return nextQueue;
+  },
+
   async clear(): Promise<void> {
     await StorageService.remove(STORAGE_KEYS.LOCATION_SYNC_QUEUE);
   },

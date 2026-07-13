@@ -98,6 +98,12 @@ const LocationSyncService = {
 async function syncQueueItem(
   item: PendingLocationSyncItem,
 ): Promise<"synced" | "discarded" | PendingLocationSyncItem> {
+  const activeTripId = await LocationSyncActiveTripService.getActiveTripId();
+
+  if (activeTripId !== item.tripId) {
+    return "discarded";
+  }
+
   if (item.attempts >= LOCATION_SYNC_MAX_ATTEMPTS_PER_ITEM) {
     handleError(new BackgroundError("Localização pendente descartada após limite de tentativas."));
     return "discarded";

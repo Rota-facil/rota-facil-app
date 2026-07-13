@@ -1,4 +1,5 @@
 import type { TripEntity, TripProgress } from "@/core/entity/tripEntity";
+import { LocationSyncQueueService } from "./locationSyncQueueService";
 import { LocationTrackingService } from "./locationTrackingService";
 import { STORAGE_KEYS, StorageService } from "./storageService";
 
@@ -38,6 +39,7 @@ const LocationSyncActiveTripService = {
 
     if (activeTripId === trip.id) {
       await this.clearActiveTripId();
+      await LocationSyncQueueService.removeByTripId(trip.id);
       await LocationTrackingService.stop();
     }
   },

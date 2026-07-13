@@ -1,14 +1,15 @@
 import type { LocationBatchEntity } from "@/core/entity/userLocationEntity";
+import { LocationSyncService } from "./locationSyncService";
 
 interface LocationBatchSink {
   deliver(batch: LocationBatchEntity): Promise<void>;
 }
 
-const noopLocationBatchSink: LocationBatchSink = {
-  async deliver() {
-    // Future location synchronization will replace this sink without changing the native task.
+const locationSyncBatchSink: LocationBatchSink = {
+  async deliver(batch: LocationBatchEntity) {
+    await LocationSyncService.syncBatch(batch);
   },
 };
 
 export type { LocationBatchSink };
-export { noopLocationBatchSink };
+export { locationSyncBatchSink };

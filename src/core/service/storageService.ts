@@ -6,6 +6,8 @@ const STORAGE_KEYS = {
   AUTH_TOKEN: "auth_token",
   FIRST_ACCESS: "first_access",
   LAST_ACCESSED_TRIP_ID: "last_accessed_trip_id",
+  LOCATION_SYNC_ACTIVE_TRIP_ID: "location_sync_active_trip_id",
+  LOCATION_SYNC_QUEUE: "location_sync_queue",
 } as const;
 
 type StorageKey = (typeof STORAGE_KEYS)[keyof typeof STORAGE_KEYS];

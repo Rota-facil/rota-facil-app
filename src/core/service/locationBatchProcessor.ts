@@ -4,7 +4,7 @@ import { userLocationMapper } from "@/core/mappers/userLocationMapper";
 import { BackgroundError } from "@/errors/errors";
 import { handleError } from "@/errors/handleError";
 import type { LocationBatchSink } from "./locationBatchSink";
-import { noopLocationBatchSink } from "./locationBatchSink";
+import { locationSyncBatchSink } from "./locationBatchSink";
 
 interface ProcessLocationBatchOptions {
   readonly receivedAt?: number;
@@ -36,7 +36,7 @@ const LocationBatchProcessor = {
     };
 
     try {
-      await (options.sink ?? noopLocationBatchSink).deliver(batch);
+      await (options.sink ?? locationSyncBatchSink).deliver(batch);
     } catch (error: unknown) {
       handleError(new BackgroundError(getBatchDeliveryErrorMessage(error)));
     }

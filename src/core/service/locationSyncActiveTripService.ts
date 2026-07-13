@@ -1,4 +1,5 @@
 import type { TripEntity, TripProgress } from "@/core/entity/tripEntity";
+import { LocationTrackingService } from "./locationTrackingService";
 import { STORAGE_KEYS, StorageService } from "./storageService";
 
 const ACTIVE_LOCATION_SYNC_PROGRESS: ReadonlySet<TripProgress> = new Set([
@@ -37,6 +38,7 @@ const LocationSyncActiveTripService = {
 
     if (activeTripId === trip.id) {
       await this.clearActiveTripId();
+      await LocationTrackingService.stop();
     }
   },
 };

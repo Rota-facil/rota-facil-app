@@ -6,6 +6,7 @@ import { colors } from "@/presentation/shared/styles/colors";
 import { TAB_SCREEN_SCROLL_BOTTOM_PADDING } from "@/presentation/shared/styles/layout";
 import { TripCard } from "../../molecules/tripCard";
 import { TripsStateView } from "../../molecules/tripsStateView";
+import TripsHeaderCard from "./tripsHeaderCard";
 
 interface TripsPageTemplateProps {
   trips: TripEntity[];
@@ -43,6 +44,7 @@ function TripsPageTemplate({
   const shouldShowInitialLoading = isInitialLoading && trips.length === 0;
   const shouldShowError = Boolean(error) && trips.length === 0;
   const shouldShowEmpty = !isInitialLoading && !error && trips.length === 0;
+  const title = context === "driver" ? "Suas operações" : "Suas viagens";
 
   return (
     <SafeAreaView className="flex-1 bg-[#F7FBFC]" edges={["top"]}>
@@ -66,6 +68,8 @@ function TripsPageTemplate({
         }
         ListHeaderComponent={
           <View className="gap-4">
+            <TripsHeaderCard title={title} />
+
             {children}
 
             {shouldShowInitialLoading ? (

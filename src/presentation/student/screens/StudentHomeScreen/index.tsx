@@ -1,20 +1,18 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { type Href, Redirect, useRouter } from "expo-router";
+import { useCallback, useEffect } from "react";
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { QR_CODE_TYPES } from "@/core/entity/qrCodeEntity";
+import { useDriverTrips } from "@/hooks/useDriverTrips";
 import { useHome } from "@/hooks/useHome";
-import { ActionCard } from "@/presentation/shared/components/molecules/actionCard";
-import { GreetingCard } from "@/presentation/shared/components/molecules/greetingCard";
-import { HomeTripCard } from "@/presentation/shared/components/molecules/homeTripCard";
-import { NoActiveTripCard } from "@/presentation/shared/components/molecules/noActiveTripCard";
 import { HomeNotifications } from "@/presentation/shared/components/organisms/homeNotifications";
-import {
-  getTripStatusLabel,
-  isTripInProgress,
-} from "@/presentation/shared/components/templates/tripDetailsTemplate/utils";
 import { colors } from "@/presentation/shared/styles/colors";
 import { TAB_SCREEN_SCROLL_BOTTOM_PADDING } from "@/presentation/shared/styles/layout";
+import {
+  StudentHomeExperience,
+  StudentHomeHeader,
+} from "@/presentation/student/components/organisms/studentHomeExperience";
 
 function StudentHomeScreen() {
   const router = useRouter();
@@ -30,6 +28,22 @@ function StudentHomeScreen() {
     reload,
     user,
   } = useHome("STUDENT");
+  const { isLoading: isStudentsLoading, loadTripStudents, students } = useDriverTrips();
+
+  useEffect(() => {
+    if (!currentTrip) {
+      return;
+    }
+
+    void loadTripStudents(currentTrip.id, { silent: true });
+  }, [currentTrip, loadTripStudents]);
+
+  const handleRefresh = useCallback(() => {
+    void Promise.all([
+      reload(),
+      currentTrip ? loadTripStudents(currentTrip.id, { silent: true }) : Promise.resolve(null),
+    ]);
+  }, [currentTrip, loadTripStudents, reload]);
 
   if (!hasLoaded || isLoading) {
     return (
@@ -89,100 +103,65 @@ function StudentHomeScreen() {
 
     router.push(`/(private)/qr-code/scan?${params.toString()}` as Href);
   };
-  const hasTripInProgress = currentTrip ? isTripInProgress(currentTrip) : false;
+  const studentTripUser = user
+    ? students.find((student) => student.user.id === user.id)
+    : undefined;
 
   return (
-    <SafeAreaView className="flex-1 bg-[#F7FBFC]" edges={["top"]}>
-      <GreetingCard
-        greeting="Olá,"
-        userName={user.name}
-        organization={user.prefecture.name}
-        summaryDescription={currentTrip ? getTripStatusLabel(currentTrip) : undefined}
-        summaryIcon="route"
-        summaryLabel={currentTrip ? "Rota vinculada" : undefined}
-        summaryValue={currentTrip?.route.name}
-        onPressNotification={() => router.push("/(private)/students/notifications")}
-      />
-
+    <SafeAreaView className="flex-1 bg-[#F7FBFC]" edges={[]}>
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ padding: 16, paddingBottom: TAB_SCREEN_SCROLL_BOTTOM_PADDING }}
+        contentContainerStyle={{
+          paddingBottom: TAB_SCREEN_SCROLL_BOTTOM_PADDING,
+        }}
         refreshControl={
           <RefreshControl
             refreshing={isRefreshing}
-            onRefresh={reload}
+            onRefresh={handleRefresh}
             tintColor={colors.primaryGlow}
             colors={[colors.primaryGlow]}
           />
         }
         showsVerticalScrollIndicator={false}
       >
-        {error ? (
-          <View className="-mt-6 rounded-[28px] border border-red-100 bg-white p-5 shadow-sm">
-            <MaterialIcons name="error-outline" size={28} color={colors.stateError} />
-            <Text className="mt-3 font-bold text-[#051223] text-lg">Viagem indisponível</Text>
-            <Text className="mt-2 text-[#5E6A7A]">{error}</Text>
-            <Pressable
-              onPress={() => void reload()}
-              className="mt-4 self-start rounded-full bg-[#0D6BEE] px-5 py-3"
-            >
-              <Text className="font-semibold text-white">Tentar novamente</Text>
-            </Pressable>
-          </View>
-        ) : currentTrip ? (
-          <HomeTripCard
-            trip={currentTrip}
-            detailLabel="Motorista e veículo"
-            detailValue={`${currentTrip.bus.driver.name} · ${currentTrip.bus.plate || "Placa não informada"}`}
-            onPress={openCurrentTripDetails}
-          />
-        ) : (
-          <NoActiveTripCard onViewTrips={openTrips} />
-        )}
-
-        {currentTrip && !error ? (
-          <View className="mt-5 gap-3">
-            {hasTripInProgress ? (
-              <View className="flex-row gap-3">
-                <View className="flex-1">
-                  <ActionCard
-                    title="Check-in"
-                    subtitle="Escanear QR Code"
-                    icon="qr-code-scanner"
-                    variant="accent"
-                    onPress={openCheckIn}
-                  />
-                </View>
-                <View className="flex-1">
-                  <ActionCard
-                    title="Mapa"
-                    subtitle="Acompanhar ônibus"
-                    icon="location-on"
-                    variant="primary"
-                    onPress={() => router.push("/(private)/students/map")}
-                  />
-                </View>
-              </View>
-            ) : null}
-
-            <View>
-              <ActionCard
-                title="Detalhes da viagem"
-                subtitle="Rota, horários e participação"
-                icon="directions-bus"
-                variant="neutral"
-                onPress={openCurrentTripDetails}
-              />
-            </View>
-          </View>
-        ) : null}
-
-        <HomeNotifications
-          notifications={notifications}
-          isLoading={isNotificationsLoading}
-          error={notificationsError}
-          onViewAll={() => router.push("/(private)/students/notifications")}
+        <StudentHomeHeader
+          userName={user.name}
+          prefectureName={user.prefecture.name}
+          onOpenNotifications={() => router.push("/(private)/students/notifications")}
         />
+
+        <View className="px-4 pt-5">
+          {error ? (
+            <View className="rounded-[28px] border border-red-100 bg-white p-5 shadow-sm">
+              <MaterialIcons name="error-outline" size={28} color={colors.stateError} />
+              <Text className="mt-3 font-bold text-[#051223] text-lg">Viagem indisponível</Text>
+              <Text className="mt-2 text-[#5E6A7A]">{error}</Text>
+              <Pressable
+                onPress={() => void reload()}
+                className="mt-4 self-start rounded-full bg-[#0D6BEE] px-5 py-3"
+              >
+                <Text className="font-semibold text-white">Tentar novamente</Text>
+              </Pressable>
+            </View>
+          ) : (
+            <StudentHomeExperience
+              trip={currentTrip}
+              studentPresence={studentTripUser?.presence ?? null}
+              isPresenceLoading={isStudentsLoading}
+              onOpenTrips={openTrips}
+              onOpenTripDetails={openCurrentTripDetails}
+              onOpenCheckIn={openCheckIn}
+              onOpenMap={() => router.push("/(private)/students/map")}
+            />
+          )}
+
+          <HomeNotifications
+            notifications={notifications}
+            isLoading={isNotificationsLoading}
+            error={notificationsError}
+            onViewAll={() => router.push("/(private)/students/notifications")}
+          />
+        </View>
       </ScrollView>
     </SafeAreaView>
   );

@@ -62,11 +62,8 @@ const TripService = {
   async getTrip(tripId: string): Promise<TripEntity> {
     const token = await getRequiredAccessToken();
     const dto = await TripRequest.getTrip(token, tripId);
-    const trip = Mapper.trip.toEntity(dto);
 
-    await LocationSyncActiveTripService.updateFromTrip(trip);
-
-    return trip;
+    return Mapper.trip.toEntity(dto);
   },
 
   async processTripPosition(payload: ProcessTripPositionPayload): Promise<void> {

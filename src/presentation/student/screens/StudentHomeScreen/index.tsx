@@ -10,6 +10,7 @@ import { HomeTripCard } from "@/presentation/shared/components/molecules/homeTri
 import { NoActiveTripCard } from "@/presentation/shared/components/molecules/noActiveTripCard";
 import { HomeNotifications } from "@/presentation/shared/components/organisms/homeNotifications";
 import { colors } from "@/presentation/shared/styles/colors";
+import { TAB_SCREEN_SCROLL_BOTTOM_PADDING } from "@/presentation/shared/styles/layout";
 
 function StudentHomeScreen() {
   const router = useRouter();
@@ -89,7 +90,7 @@ function StudentHomeScreen() {
 
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ padding: 16, paddingBottom: 128 }}
+        contentContainerStyle={{ padding: 16, paddingBottom: TAB_SCREEN_SCROLL_BOTTOM_PADDING }}
         refreshControl={
           <RefreshControl
             refreshing={isRefreshing}

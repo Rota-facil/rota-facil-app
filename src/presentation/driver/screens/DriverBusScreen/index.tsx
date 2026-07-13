@@ -6,6 +6,7 @@ import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from "rea
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useDriver } from "@/hooks/useDriver";
 import { colors } from "@/presentation/shared/styles/colors";
+import { TAB_SCREEN_SCROLL_BOTTOM_PADDING } from "@/presentation/shared/styles/layout";
 
 function getBusStatusLabel(status: string) {
   return status === "OPERATION" ? "Em operação" : "Fora de operação";
@@ -34,7 +35,7 @@ function DriverBusScreen() {
   return (
     <SafeAreaView className="flex-1 bg-[#F7FBFC]" edges={["top", "bottom"]}>
       <ScrollView
-        contentContainerStyle={{ paddingBottom: 132 }}
+        contentContainerStyle={{ paddingBottom: TAB_SCREEN_SCROLL_BOTTOM_PADDING }}
         showsVerticalScrollIndicator={false}
       >
         <LinearGradient

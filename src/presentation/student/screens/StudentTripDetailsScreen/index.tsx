@@ -4,6 +4,7 @@ import { router, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { FlatList, Modal, Pressable, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { QR_CODE_TYPES } from "@/core/entity/qrCodeEntity";
 import type {
   SimpleTripUserEntity,
@@ -20,6 +21,7 @@ import {
 } from "@/presentation/shared/components/templates/tripDetailsTemplate";
 import { getTripDetailsPermissions } from "@/presentation/shared/components/templates/tripDetailsTemplate/utils";
 import { colors } from "@/presentation/shared/styles/colors";
+import { MODAL_BOTTOM_SAFE_PADDING } from "@/presentation/shared/styles/layout";
 import {
   type JoinTripFormSchema,
   joinTripSchema,
@@ -104,6 +106,7 @@ function LocationSelect({
   placeholder,
   value,
 }: LocationSelectProps) {
+  const insets = useSafeAreaInsets();
   const [isOpen, setIsOpen] = useState(false);
   const selectedLocation = locations.find((location) => location.id === value);
 
@@ -137,7 +140,10 @@ function LocationSelect({
         onRequestClose={() => setIsOpen(false)}
       >
         <Pressable className="flex-1 justify-end bg-black/40" onPress={() => setIsOpen(false)}>
-          <Pressable className="max-h-[72%] rounded-t-3xl bg-white p-5">
+          <Pressable
+            className="max-h-[72%] rounded-t-3xl bg-white px-5 pt-5"
+            style={{ paddingBottom: Math.max(insets.bottom, MODAL_BOTTOM_SAFE_PADDING) }}
+          >
             <View className="mb-4 flex-row items-center justify-between">
               <View className="flex-1">
                 <Text className="font-bold text-lg text-[#051223]">{label}</Text>
@@ -229,6 +235,7 @@ function JoinTripModal({
   readonly onSubmit: (values: JoinTripFormSchema) => void;
   readonly visible: boolean;
 }) {
+  const insets = useSafeAreaInsets();
   const form = useForm<JoinTripFormSchema>({
     resolver: zodResolver(joinTripSchema),
     defaultValues: {
@@ -248,7 +255,10 @@ function JoinTripModal({
       <View className="flex-1 justify-end bg-black/45">
         <Pressable className="flex-1" disabled={loading} onPress={onClose} />
 
-        <View className="rounded-t-[28px] bg-white px-6 pb-7 pt-5">
+        <View
+          className="rounded-t-[28px] bg-white px-6 pt-5"
+          style={{ paddingBottom: Math.max(insets.bottom, MODAL_BOTTOM_SAFE_PADDING) }}
+        >
           <View className="mb-5 flex-row items-start justify-between">
             <View className="mr-4 flex-1">
               <View className="mb-4 h-12 w-12 items-center justify-center rounded-full bg-[#EAF3FF]">

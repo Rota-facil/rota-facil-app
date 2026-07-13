@@ -1,7 +1,9 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { Modal, Pressable, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { getTripTimeLabel, type TripMapViewModel } from "@/hooks/tripMapModel";
 import { colors } from "@/presentation/shared/styles/colors";
+import { MODAL_BOTTOM_SAFE_PADDING } from "@/presentation/shared/styles/layout";
 import { TripMapInfoTile } from "../TripMapInfoTile";
 
 interface TripMapDetailsModalProps {
@@ -17,6 +19,7 @@ const selectionSourceLabels: Record<TripMapViewModel["selectionSource"], string>
 };
 
 function TripMapDetailsModal({ visible, viewModel, onClose }: TripMapDetailsModalProps) {
+  const insets = useSafeAreaInsets();
   const { trip } = viewModel;
   const directionLabel = viewModel.routeProgress.direction === "returning" ? "Volta" : "Ida";
   const pointProgressLabel =
@@ -29,7 +32,10 @@ function TripMapDetailsModal({ visible, viewModel, onClose }: TripMapDetailsModa
       <View className="flex-1 justify-end bg-black/40">
         <Pressable className="flex-1" onPress={onClose} />
 
-        <View className="rounded-t-[28px] bg-white px-5 pb-7 pt-4">
+        <View
+          className="rounded-t-[28px] bg-white px-5 pt-4"
+          style={{ paddingBottom: Math.max(insets.bottom, MODAL_BOTTOM_SAFE_PADDING) }}
+        >
           <View className="items-center">
             <View className="h-1.5 w-12 rounded-full bg-[#D2DCE8]" />
           </View>

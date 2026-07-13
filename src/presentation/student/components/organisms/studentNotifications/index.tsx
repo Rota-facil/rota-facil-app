@@ -13,6 +13,7 @@ import type { NotificationEntity, NotificationType } from "@/core/entity/notific
 import { useNotifications } from "@/hooks/useNotifications";
 import { NotificationCard } from "@/presentation/shared/components/molecules/notificationCard";
 import { colors } from "@/presentation/shared/styles/colors";
+import { TAB_SCREEN_SCROLL_BOTTOM_PADDING } from "@/presentation/shared/styles/layout";
 
 interface NotificationSection {
   title: "HOJE" | "ANTERIORES";
@@ -136,7 +137,13 @@ function StudentNotifications() {
       {isLoading && notifications.length === 0 ? (
         <ScrollView
           className="flex-1"
-          contentContainerClassName="flex-grow items-center justify-center px-6 pb-24"
+          contentContainerStyle={{
+            alignItems: "center",
+            flexGrow: 1,
+            justifyContent: "center",
+            paddingBottom: TAB_SCREEN_SCROLL_BOTTOM_PADDING,
+            paddingHorizontal: 24,
+          }}
           refreshControl={refreshControl}
           showsVerticalScrollIndicator={false}
         >
@@ -146,7 +153,13 @@ function StudentNotifications() {
       ) : error && notifications.length === 0 ? (
         <ScrollView
           className="flex-1"
-          contentContainerClassName="flex-grow items-center justify-center px-6 pb-24"
+          contentContainerStyle={{
+            alignItems: "center",
+            flexGrow: 1,
+            justifyContent: "center",
+            paddingBottom: TAB_SCREEN_SCROLL_BOTTOM_PADDING,
+            paddingHorizontal: 24,
+          }}
           refreshControl={refreshControl}
           showsVerticalScrollIndicator={false}
         >
@@ -170,7 +183,13 @@ function StudentNotifications() {
       ) : notifications.length === 0 ? (
         <ScrollView
           className="flex-1"
-          contentContainerClassName="flex-grow items-center justify-center px-8 pb-24"
+          contentContainerStyle={{
+            alignItems: "center",
+            flexGrow: 1,
+            justifyContent: "center",
+            paddingBottom: TAB_SCREEN_SCROLL_BOTTOM_PADDING,
+            paddingHorizontal: 32,
+          }}
           refreshControl={refreshControl}
           showsVerticalScrollIndicator={false}
         >
@@ -195,7 +214,7 @@ function StudentNotifications() {
           stickySectionHeadersEnabled={false}
           contentContainerStyle={{
             paddingHorizontal: 20,
-            paddingBottom: 132,
+            paddingBottom: TAB_SCREEN_SCROLL_BOTTOM_PADDING,
             flexGrow: 1,
           }}
           renderSectionHeader={({ section }) => (

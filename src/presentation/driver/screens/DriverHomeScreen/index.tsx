@@ -10,6 +10,7 @@ import { NoActiveTripCard } from "@/presentation/shared/components/molecules/noA
 import { QrCodeDisplay } from "@/presentation/shared/components/molecules/qrCodeDisplay";
 import { HomeNotifications } from "@/presentation/shared/components/organisms/homeNotifications";
 import { colors } from "@/presentation/shared/styles/colors";
+import { TAB_SCREEN_SCROLL_BOTTOM_PADDING } from "@/presentation/shared/styles/layout";
 
 function DriverHomeScreen() {
   const router = useRouter();
@@ -75,7 +76,7 @@ function DriverHomeScreen() {
 
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ padding: 16, paddingBottom: 128 }}
+        contentContainerStyle={{ padding: 16, paddingBottom: TAB_SCREEN_SCROLL_BOTTOM_PADDING }}
         refreshControl={
           <RefreshControl
             refreshing={isRefreshing}

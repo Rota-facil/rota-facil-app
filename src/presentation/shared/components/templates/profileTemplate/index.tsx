@@ -4,6 +4,7 @@ import type React from "react";
 import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { colors } from "@/presentation/shared/styles/colors";
+import { TAB_SCREEN_SCROLL_BOTTOM_PADDING } from "@/presentation/shared/styles/layout";
 
 interface ProfileMetric {
   label: string;
@@ -109,7 +110,7 @@ function ProfileTemplate({
     <SafeAreaView className="flex-1 bg-[#F7FBFC]" edges={["top", "bottom"]}>
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 132 }}
+        contentContainerStyle={{ paddingBottom: TAB_SCREEN_SCROLL_BOTTOM_PADDING }}
       >
         <LinearGradient
           colors={["#102A72", colors.primary, "#0476F8"]}

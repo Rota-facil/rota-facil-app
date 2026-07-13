@@ -11,6 +11,7 @@ import { CpfInput } from "@/presentation/shared/components/atoms/cpfInput";
 import { FormInput } from "@/presentation/shared/components/atoms/formInput";
 import { SystemButton } from "@/presentation/shared/components/atoms/systemButton";
 import { colors } from "@/presentation/shared/styles/colors";
+import { TAB_SCREEN_SCROLL_BOTTOM_PADDING } from "@/presentation/shared/styles/layout";
 import {
   type StudentProfileFormSchema,
   studentProfileSchema,
@@ -78,7 +79,7 @@ function EditStudentProfileScreen() {
   return (
     <SafeAreaView className="flex-1 bg-[#F7FBFC]" edges={["top", "bottom"]}>
       <ScrollView
-        contentContainerStyle={{ paddingBottom: 132 }}
+        contentContainerStyle={{ paddingBottom: TAB_SCREEN_SCROLL_BOTTOM_PADDING }}
         showsVerticalScrollIndicator={false}
       >
         <LinearGradient

@@ -10,6 +10,7 @@ import {
 } from "@/core/service/tripRouteProgressService";
 import { SystemButton } from "@/presentation/shared/components/atoms/systemButton";
 import { colors } from "@/presentation/shared/styles/colors";
+import { TAB_SCREEN_SCROLL_BOTTOM_PADDING } from "@/presentation/shared/styles/layout";
 import {
   formatTripTime,
   getPrimaryBoardPointName,
@@ -713,7 +714,12 @@ function TripDetailsTemplate({
       <FlatList
         data={listData}
         keyExtractor={(student) => student.id}
-        contentContainerClassName="px-6 pt-4 pb-32 gap-4"
+        contentContainerStyle={{
+          gap: 16,
+          paddingBottom: TAB_SCREEN_SCROLL_BOTTOM_PADDING,
+          paddingHorizontal: 24,
+          paddingTop: 16,
+        }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl

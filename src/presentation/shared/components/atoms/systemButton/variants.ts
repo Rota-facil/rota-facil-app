@@ -22,6 +22,13 @@ const SYSTEM_BUTTON_VARIANTS = {
     shadow: colors.stateError,
   },
 
+  warning: {
+    gradient: ["#FBBF24", colors.accentGlow] as const,
+    text: "#1F2937",
+    icon: "#1F2937",
+    shadow: colors.accentGlow,
+  },
+
   disabled: {
     gradient: ["#E2E8F0", "#CBD5E1"] as const,
     text: "#475569",

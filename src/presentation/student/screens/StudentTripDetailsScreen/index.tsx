@@ -3,7 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { FlatList, Modal, Pressable, Text, View } from "react-native";
+import { FlatList, Modal, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { QR_CODE_TYPES } from "@/core/entity/qrCodeEntity";
 import type {
@@ -20,9 +20,12 @@ import {
   TripDetailsTemplate,
 } from "@/presentation/shared/components/templates/tripDetailsTemplate";
 import { getTripDetailsPermissions } from "@/presentation/shared/components/templates/tripDetailsTemplate/utils";
+import { useKeyboardHeight } from "@/presentation/shared/hooks/useKeyboardVisible";
 import { colors } from "@/presentation/shared/styles/colors";
 import { MODAL_BOTTOM_SAFE_PADDING } from "@/presentation/shared/styles/layout";
 import {
+  type EvaluateTripDriverFormSchema,
+  evaluateTripDriverSchema,
   type JoinTripFormSchema,
   joinTripSchema,
 } from "@/presentation/student/schemas/tripDetailsSchema";
@@ -42,22 +45,26 @@ interface LocationSelectProps {
 
 function StudentActions({
   canCheckIn,
+  canEvaluateDriver,
   canJoinTrip,
   canLeaveTrip,
   isLoading,
   onCheckIn,
+  onEvaluateDriver,
   onJoinTrip,
   onLeaveTrip,
 }: {
   readonly canCheckIn: boolean;
+  readonly canEvaluateDriver: boolean;
   readonly canJoinTrip: boolean;
   readonly canLeaveTrip: boolean;
   readonly isLoading: boolean;
   readonly onCheckIn: () => void;
+  readonly onEvaluateDriver: () => void;
   readonly onJoinTrip: () => void;
   readonly onLeaveTrip: () => void;
 }) {
-  if (!canCheckIn && !canJoinTrip && !canLeaveTrip) {
+  if (!canCheckIn && !canEvaluateDriver && !canJoinTrip && !canLeaveTrip) {
     return null;
   }
 
@@ -85,6 +92,16 @@ function StudentActions({
         />
       ) : null}
 
+      {canEvaluateDriver ? (
+        <SystemButton
+          title="Avaliar motorista"
+          iconLeft="star"
+          variant="warning"
+          disabled={isLoading}
+          onPress={onEvaluateDriver}
+        />
+      ) : null}
+
       {canLeaveTrip ? (
         <SystemButton
           title="Cancelar participação"
@@ -95,6 +112,161 @@ function StudentActions({
         />
       ) : null}
     </View>
+  );
+}
+
+function EvaluateDriverModal({
+  driverName,
+  error,
+  loading,
+  onClose,
+  onSubmit,
+  visible,
+}: {
+  readonly driverName: string;
+  readonly error: string | null;
+  readonly loading: boolean;
+  readonly onClose: () => void;
+  readonly onSubmit: (values: EvaluateTripDriverFormSchema) => void;
+  readonly visible: boolean;
+}) {
+  const insets = useSafeAreaInsets();
+  const keyboardHeight = useKeyboardHeight();
+  const isKeyboardVisible = keyboardHeight > 0;
+  const [focusedField, setFocusedField] = useState<"feedback" | null>(null);
+  const form = useForm<EvaluateTripDriverFormSchema>({
+    resolver: zodResolver(evaluateTripDriverSchema),
+    defaultValues: {
+      feedback: "",
+      note: 0,
+    },
+  });
+
+  useEffect(() => {
+    if (!visible) {
+      form.reset({ feedback: "", note: 0 });
+    }
+  }, [form, visible]);
+
+  const note = form.watch("note");
+  const bottomPadding = isKeyboardVisible
+    ? Math.max(insets.bottom, MODAL_BOTTOM_SAFE_PADDING)
+    : MODAL_BOTTOM_SAFE_PADDING;
+  const bottomOffset = isKeyboardVisible ? keyboardHeight : 0;
+
+  return (
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+      <View className="flex-1 justify-end bg-black/45">
+        <Pressable className="flex-1" disabled={loading} onPress={onClose} />
+
+        <View
+          className="max-h-[92%] rounded-t-[28px] bg-white px-6 pt-5"
+          style={{ marginBottom: bottomOffset, paddingBottom: bottomPadding }}
+        >
+          <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+            <View className="mb-5 flex-row items-start justify-between">
+              <View className="mr-4 flex-1">
+                <View className="mb-4 h-12 w-12 items-center justify-center rounded-full bg-[#FFF4DA]">
+                  <MaterialIcons name="star" size={28} color={colors.accentGlow} />
+                </View>
+                <Text className="font-bold text-xl text-[#051223]">Avaliar motorista</Text>
+                <Text className="mt-2 font-semibold text-[#051223]">{driverName}</Text>
+                <Text className="mt-0.5 text-sm text-[#5E6A7A]">
+                  Conte como foi sua experiência nesta viagem.
+                </Text>
+              </View>
+
+              <Pressable
+                disabled={loading}
+                onPress={onClose}
+                className="h-10 w-10 items-center justify-center rounded-full bg-[#F1F5F9]"
+              >
+                <MaterialIcons name="close" size={22} color={colors.muted} />
+              </Pressable>
+            </View>
+
+            <Controller
+              control={form.control}
+              name="note"
+              render={({ fieldState }) => (
+                <View>
+                  <Text className="mb-2 text-sm font-semibold text-[#5E6A7A]">
+                    EXPERIÊNCIA COM O MOTORISTA
+                  </Text>
+                  <View className="flex-row gap-2">
+                    {[1, 2, 3, 4, 5].map((value) => (
+                      <Pressable
+                        key={value}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Selecionar nota ${value}`}
+                        disabled={loading}
+                        onPress={() => form.setValue("note", value, { shouldValidate: true })}
+                        className="h-11 w-11 items-center justify-center rounded-full bg-[#F8FAFC]"
+                      >
+                        <MaterialIcons
+                          name={value <= note ? "star" : "star-border"}
+                          size={28}
+                          color={value <= note ? colors.accentGlow : colors.muted}
+                        />
+                      </Pressable>
+                    ))}
+                  </View>
+                  {fieldState.error ? (
+                    <Text className="mt-2 text-sm text-[#DC2626]">{fieldState.error.message}</Text>
+                  ) : null}
+                </View>
+              )}
+            />
+
+            <Controller
+              control={form.control}
+              name="feedback"
+              render={({ field, fieldState }) => (
+                <View className="mt-4">
+                  <Text className="mb-2 text-sm font-semibold text-[#5E6A7A]">
+                    Comentário (opcional)
+                  </Text>
+                  <TextInput
+                    editable={!loading}
+                    value={field.value}
+                    onBlur={() => {
+                      field.onBlur();
+                      setFocusedField(null);
+                    }}
+                    onFocus={() => setFocusedField("feedback")}
+                    onChangeText={field.onChange}
+                    multiline
+                    textAlignVertical="top"
+                    maxLength={600}
+                    placeholder="Registre uma observação sobre a condução da viagem."
+                    className="min-h-24 rounded-2xl border px-4 py-3 text-[#051223]"
+                    style={{
+                      backgroundColor: focusedField === "feedback" ? "#FFF7E8" : "#FFFFFF",
+                      borderColor: focusedField === "feedback" ? colors.accentGlow : colors.border,
+                    }}
+                  />
+                  {fieldState.error ? (
+                    <Text className="mt-2 text-sm text-[#DC2626]">{fieldState.error.message}</Text>
+                  ) : null}
+                </View>
+              )}
+            />
+
+            {error ? <Text className="mt-3 text-sm text-[#DC2626]">{error}</Text> : null}
+
+            <View className="mt-5">
+              <SystemButton
+                title="Enviar avaliação"
+                iconLeft="star"
+                variant="warning"
+                loading={loading}
+                onPress={form.handleSubmit(onSubmit)}
+              />
+            </View>
+          </ScrollView>
+        </View>
+      </View>
+    </Modal>
   );
 }
 
@@ -330,6 +502,8 @@ function JoinTripModal({
 function StudentTripDetailsScreen({ tripId }: StudentTripDetailsScreenProps) {
   const {
     error: tripError,
+    evaluateDriver,
+    evaluateDriverError,
     exitTrip,
     isLoading: isTripLoading,
     joinTrip,
@@ -341,6 +515,7 @@ function StudentTripDetailsScreen({ tripId }: StudentTripDetailsScreenProps) {
   const { isLoading: isUserLoading, loadUser, user } = useUser();
   const [activeTab, setActiveTab] = useState<TripDetailsTab>("summary");
   const [isJoinModalVisible, setIsJoinModalVisible] = useState(false);
+  const [isEvaluateDriverModalVisible, setIsEvaluateDriverModalVisible] = useState(false);
   const [hasLoadedDetails, setHasLoadedDetails] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [studentTrips, setStudentTrips] = useState<TripEntity[]>([]);
@@ -447,6 +622,24 @@ function StudentTripDetailsScreen({ tripId }: StudentTripDetailsScreenProps) {
     }
   }, [exitTrip, refreshAfterMutation, tripId]);
 
+  const handleEvaluateDriver = useCallback(
+    async (values: EvaluateTripDriverFormSchema) => {
+      if (!trip) {
+        return;
+      }
+
+      const evaluation = await evaluateDriver(trip.bus.driver.id, {
+        feedback: values.feedback?.trim() ?? "",
+        note: values.note,
+      });
+
+      if (evaluation) {
+        setIsEvaluateDriverModalVisible(false);
+      }
+    },
+    [evaluateDriver, trip],
+  );
+
   const handleRefresh = useCallback(() => {
     void loadDetails("refresh");
   }, [loadDetails]);
@@ -487,10 +680,12 @@ function StudentTripDetailsScreen({ tripId }: StudentTripDetailsScreenProps) {
           permissions ? (
             <StudentActions
               canCheckIn={permissions.canCheckIn}
+              canEvaluateDriver={isStudentJoined && permissions.canRateDriver}
               canJoinTrip={!isStudentJoined && permissions.canJoinTrip}
               canLeaveTrip={isStudentJoined && permissions.canLeaveTrip}
               isLoading={isActionLoading}
               onCheckIn={handleCheckIn}
+              onEvaluateDriver={() => setIsEvaluateDriverModalVisible(true)}
               onJoinTrip={() => setIsJoinModalVisible(true)}
               onLeaveTrip={handleLeaveTrip}
             />
@@ -507,6 +702,17 @@ function StudentTripDetailsScreen({ tripId }: StudentTripDetailsScreenProps) {
           error={tripError}
           onClose={() => setIsJoinModalVisible(false)}
           onSubmit={handleJoinTrip}
+        />
+      ) : null}
+
+      {trip ? (
+        <EvaluateDriverModal
+          visible={isEvaluateDriverModalVisible}
+          driverName={trip.bus.driver.name}
+          loading={isActionLoading}
+          error={evaluateDriverError}
+          onClose={() => setIsEvaluateDriverModalVisible(false)}
+          onSubmit={handleEvaluateDriver}
         />
       ) : null}
     </>

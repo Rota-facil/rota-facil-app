@@ -44,11 +44,12 @@ function getStudentMainState(params: {
     return {
       accent: colors.stateSuccess,
       border: "#BBF7D0",
-      description: "A viagem vinculada já foi finalizada.",
+      description:
+        "A viagem vinculada já foi finalizada. Você pode avaliar o motorista nos detalhes.",
       eyebrow: "Tudo certo por aqui",
       icon: "check-circle",
       iconBackground: "#DCFCE7",
-      infoDescription: "Nenhuma ação é necessária neste momento.",
+      infoDescription: "Abra os detalhes da viagem para registrar sua avaliação do motorista.",
       infoTitle: "Tudo certo por aqui",
       primaryAction: "details",
       surface: "#F0FDF4",

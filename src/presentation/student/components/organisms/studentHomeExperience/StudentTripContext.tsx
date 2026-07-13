@@ -136,9 +136,11 @@ function StudentTripContext({
 
           {mainState.primaryAction === "details" ? (
             <HomeContextAction
-              accent={mainState.accent}
-              title={tripNotStarted ? "Ver viagem" : "Ver detalhes"}
-              iconLeft="directions-bus"
+              accent={tripFinished ? colors.accentGlow : mainState.accent}
+              title={
+                tripFinished ? "Avaliar motorista" : tripNotStarted ? "Ver viagem" : "Ver detalhes"
+              }
+              iconLeft={tripFinished ? "star" : "directions-bus"}
               onPress={onOpenTripDetails}
             />
           ) : null}

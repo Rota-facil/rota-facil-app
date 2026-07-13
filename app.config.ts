@@ -7,6 +7,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     ...config,
     name: config.name ?? "rota-facil",
     slug: config.slug ?? "rota-facil",
+    scheme: "rotafacil",
 
     android: {
       ...config.android,

@@ -10,9 +10,16 @@ interface CpfInputProps<T extends FieldValues> {
   name: Path<T>;
   label: string;
   placeholder: string;
+  disabled?: boolean;
 }
 
-function CpfInput<T extends FieldValues>({ control, name, label, placeholder }: CpfInputProps<T>) {
+function CpfInput<T extends FieldValues>({
+  control,
+  disabled = false,
+  name,
+  label,
+  placeholder,
+}: CpfInputProps<T>) {
   return (
     <Controller
       control={control}
@@ -25,6 +32,7 @@ function CpfInput<T extends FieldValues>({ control, name, label, placeholder }: 
             <Text className="mb-2 text-sm font-semibold text-[#5E6A7A]">{label}</Text>
 
             <BaseInput
+              editable={!disabled}
               value={formatCpf(String(field.value ?? ""))}
               onChangeText={(value) => field.onChange(onlyCpfDigits(value))}
               placeholder={placeholder}

@@ -14,6 +14,7 @@ interface PrefectureSelectProps<T extends FieldValues> {
   placeholder: string;
   prefectures: PrefectureEntity[];
   loading?: boolean;
+  disabled?: boolean;
   error?: string | null;
 }
 
@@ -24,6 +25,7 @@ function PrefectureSelect<T extends FieldValues>({
   placeholder,
   prefectures,
   loading = false,
+  disabled = false,
   error,
 }: PrefectureSelectProps<T>) {
   const insets = useSafeAreaInsets();
@@ -46,7 +48,7 @@ function PrefectureSelect<T extends FieldValues>({
 
             <TouchableOpacity
               activeOpacity={0.85}
-              disabled={loading}
+              disabled={loading || disabled}
               onPress={() => setIsOpen(true)}
               className="h-14 flex-row items-center rounded-2xl border px-4"
               style={{

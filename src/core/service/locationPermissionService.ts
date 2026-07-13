@@ -43,6 +43,28 @@ const LocationPermissionService = {
     return this.getPermissionState();
   },
 
+  async requestTripStartPermission(): Promise<LocationPermissionState> {
+    let permissionState = await this.getPermissionState();
+
+    if (!permissionState.servicesEnabled) {
+      return permissionState;
+    }
+
+    if (permissionState.foreground !== "granted" && permissionState.canAskForeground) {
+      permissionState = await this.requestForegroundPermission();
+    }
+
+    if (permissionState.foreground !== "granted") {
+      return permissionState;
+    }
+
+    if (permissionState.background !== "granted" && permissionState.canAskBackground) {
+      permissionState = await this.requestBackgroundPermission();
+    }
+
+    return permissionState;
+  },
+
   async hasServicesEnabled(): Promise<boolean> {
     return Location.hasServicesEnabledAsync();
   },

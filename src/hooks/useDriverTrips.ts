@@ -6,9 +6,14 @@ import type {
   SimpleTripUserEntity,
   TripEntity,
 } from "@/core/entity/tripEntity";
-import type { LocationTrackingState } from "@/core/entity/userLocationEntity";
+import type {
+  LocationPermissionState,
+  LocationTrackingState,
+} from "@/core/entity/userLocationEntity";
+import { LocationPermissionService } from "@/core/service/locationPermissionService";
 import { LocationTrackingService } from "@/core/service/locationTrackingService";
 import { TripService } from "@/core/service/tripService";
+import { BackgroundError } from "@/errors/errors";
 import { getErrorMessage } from "@/errors/getErrorMessage";
 import { handleError } from "@/errors/handleError";
 
@@ -18,6 +23,11 @@ import { handleError } from "@/errors/handleError";
  * e avaliação de estudante sem acoplar a apresentação aos contratos HTTP.
  * O agendamento periódico da localização fica sob responsabilidade da tela.
  */
+interface LocationTrackingPreparationResult {
+  readonly canStartTrip: boolean;
+  readonly shouldStopTrackingOnFailure: boolean;
+}
+
 function useDriverTrips() {
   const [trip, setTrip] = useState<TripEntity | null>(null);
   const [students, setStudents] = useState<SimpleTripUserEntity[]>([]);
@@ -29,35 +39,55 @@ function useDriverTrips() {
   const [cancelTripError, setCancelTripError] = useState<string | null>(null);
   const [evaluateStudentError, setEvaluateStudentError] = useState<string | null>(null);
 
-  const startLocationTracking = useCallback(async () => {
-    try {
-      const trackingState = await LocationTrackingService.start();
-      const message = getLocationTrackingStartMessage(trackingState);
+  const prepareLocationTracking =
+    useCallback(async (): Promise<LocationTrackingPreparationResult> => {
+      const currentTrackingState = await LocationTrackingService.getStatus();
+      const permissionState = await LocationPermissionService.requestTripStartPermission();
+      const permissionMessage = getLocationPermissionStartMessage(permissionState);
 
-      if (message) {
-        setInitTripError(message);
+      if (permissionMessage) {
+        setInitTripError(permissionMessage);
+        return { canStartTrip: false, shouldStopTrackingOnFailure: false };
       }
-    } catch (e: unknown) {
-      const message = getErrorMessage(e, "A viagem foi iniciada, mas a localização não começou.");
 
-      setInitTripError(message);
-      handleError(e);
-    }
-  }, []);
+      const trackingState = await LocationTrackingService.start();
+      const trackingMessage = getLocationTrackingStartMessage(trackingState);
+
+      if (trackingMessage) {
+        setInitTripError(trackingMessage);
+        return { canStartTrip: false, shouldStopTrackingOnFailure: false };
+      }
+
+      return {
+        canStartTrip: true,
+        shouldStopTrackingOnFailure: !currentTrackingState.isRegistered,
+      };
+    }, []);
 
   const initTrip = useCallback(
     async (tripId: string) => {
+      let trackingPreparation: LocationTrackingPreparationResult | null = null;
+
       setIsLoading(true);
       setError(null);
       setInitTripError(null);
 
       try {
+        trackingPreparation = await prepareLocationTracking();
+
+        if (!trackingPreparation.canStartTrip) {
+          return null;
+        }
+
         const data = await TripService.initTrip(tripId);
         setTrip(data);
-        await startLocationTracking();
 
         return data;
       } catch (e: unknown) {
+        if (trackingPreparation?.shouldStopTrackingOnFailure) {
+          await stopLocationTrackingAfterFailedTripStart();
+        }
+
         const message = getErrorMessage(e, "Não foi possível iniciar a viagem.");
 
         setError(message);
@@ -68,22 +98,33 @@ function useDriverTrips() {
         setIsLoading(false);
       }
     },
-    [startLocationTracking],
+    [prepareLocationTracking],
   );
 
   const initTripReturn = useCallback(
     async (tripId: string) => {
+      let trackingPreparation: LocationTrackingPreparationResult | null = null;
+
       setIsLoading(true);
       setError(null);
       setInitTripError(null);
 
       try {
+        trackingPreparation = await prepareLocationTracking();
+
+        if (!trackingPreparation.canStartTrip) {
+          return null;
+        }
+
         const data = await TripService.initTripReturn(tripId);
         setTrip(data);
-        await startLocationTracking();
 
         return data;
       } catch (e: unknown) {
+        if (trackingPreparation?.shouldStopTrackingOnFailure) {
+          await stopLocationTrackingAfterFailedTripStart();
+        }
+
         const message = getErrorMessage(e, "Não foi possível iniciar o retorno.");
 
         setError(message);
@@ -94,9 +135,8 @@ function useDriverTrips() {
         setIsLoading(false);
       }
     },
-    [startLocationTracking],
+    [prepareLocationTracking],
   );
-
   const cancelTrip = useCallback(async (tripId: string, payload: CancelTripPayload) => {
     setIsLoading(true);
     setError(null);
@@ -210,24 +250,56 @@ function useDriverTrips() {
   };
 }
 
+function getLocationPermissionStartMessage(
+  permissionState: LocationPermissionState,
+): string | null {
+  if (!permissionState.servicesEnabled) {
+    return "Ative a localização do dispositivo antes de iniciar a viagem.";
+  }
+
+  if (permissionState.foreground !== "granted") {
+    return permissionState.canAskForeground
+      ? "Permita a localização enquanto usa o app antes de iniciar a viagem."
+      : "A localização enquanto usa o app está bloqueada. Ative a permissão nas configurações do dispositivo para iniciar a viagem.";
+  }
+
+  if (permissionState.background !== "granted") {
+    return permissionState.canAskBackground
+      ? "Permita a localização em segundo plano para iniciar a viagem."
+      : "A localização em segundo plano está bloqueada. Ative a permissão nas configurações do dispositivo para iniciar a viagem.";
+  }
+
+  return null;
+}
+
 function getLocationTrackingStartMessage(trackingState: LocationTrackingState): string | null {
   if (trackingState.status === "tracking") {
     return null;
   }
 
   if (trackingState.status === "blocked") {
-    return "A viagem foi iniciada, mas a permissão de localização em segundo plano não está ativa.";
+    return "Permita a localização em segundo plano para iniciar a viagem.";
   }
 
   if (trackingState.status === "unavailable") {
-    return "A viagem foi iniciada, mas a localização do dispositivo está indisponível.";
+    return "A localização do dispositivo está indisponível. Ative a localização antes de iniciar a viagem.";
   }
 
   if (trackingState.status === "error") {
-    return "A viagem foi iniciada, mas não foi possível iniciar a localização.";
+    return "Não foi possível iniciar o rastreamento de localização da viagem.";
   }
 
-  return "A viagem foi iniciada, mas a localização ainda não está em acompanhamento.";
+  return "A localização ainda não está em acompanhamento. Tente iniciar a viagem novamente.";
+}
+
+async function stopLocationTrackingAfterFailedTripStart(): Promise<void> {
+  try {
+    await LocationTrackingService.stop();
+  } catch (error: unknown) {
+    const message = getErrorMessage(error, "Não foi possível parar a localização após falha.");
+
+    handleError(new BackgroundError(message));
+  }
 }
 
 export { useDriverTrips };

@@ -3,16 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import {
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  Pressable,
-  ScrollView,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { Modal, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { SimpleTripUserEntity } from "@/core/entity/tripEntity";
 import { QrCodeService } from "@/core/service/qrCodeService";
@@ -35,10 +26,7 @@ import {
   getTripDetailsPermissions,
   isTripWaitingReturn,
 } from "@/presentation/shared/components/templates/tripDetailsTemplate/utils";
-import {
-  useKeyboardHeight,
-  useKeyboardVisible,
-} from "@/presentation/shared/hooks/useKeyboardVisible";
+import { useKeyboardHeight } from "@/presentation/shared/hooks/useKeyboardVisible";
 import { colors } from "@/presentation/shared/styles/colors";
 import { MODAL_BOTTOM_SAFE_PADDING } from "@/presentation/shared/styles/layout";
 
@@ -317,7 +305,9 @@ function EvaluateStudentModal({
   readonly student: SimpleTripUserEntity | null;
 }) {
   const insets = useSafeAreaInsets();
-  const isKeyboardVisible = useKeyboardVisible();
+  const keyboardHeight = useKeyboardHeight();
+  const isKeyboardVisible = keyboardHeight > 0;
+  const [focusedField, setFocusedField] = useState<"feedback" | null>(null);
   const form = useForm<EvaluateTripStudentFormSchema>({
     resolver: zodResolver(evaluateTripStudentSchema),
     defaultValues: {
@@ -333,25 +323,21 @@ function EvaluateStudentModal({
   }, [form, student]);
 
   const note = form.watch("note");
+  const bottomPadding = isKeyboardVisible
+    ? Math.max(insets.bottom, MODAL_BOTTOM_SAFE_PADDING)
+    : MODAL_BOTTOM_SAFE_PADDING;
+  const bottomOffset = isKeyboardVisible ? keyboardHeight : 0;
 
   return (
     <Modal visible={Boolean(student)} transparent animationType="fade" onRequestClose={onClose}>
-      <KeyboardAvoidingView
-        enabled={isKeyboardVisible}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        className="flex-1"
-      >
-        <View className="flex-1 justify-end bg-black/45">
-          <Pressable className="flex-1" disabled={loading} onPress={onClose} />
+      <View className="flex-1 justify-end bg-black/45">
+        <Pressable className="flex-1" disabled={loading} onPress={onClose} />
 
-          <ScrollView
-            className="max-h-[92%] rounded-t-[28px] bg-white px-6 pt-5"
-            contentContainerStyle={{
-              paddingBottom: Math.max(insets.bottom, MODAL_BOTTOM_SAFE_PADDING),
-            }}
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
-          >
+        <View
+          className="max-h-[92%] rounded-t-[28px] bg-white px-6 pt-5"
+          style={{ marginBottom: bottomOffset, paddingBottom: bottomPadding }}
+        >
+          <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
             <View className="mb-5 flex-row items-start justify-between">
               <View className="mr-4 flex-1">
                 <View className="mb-4 h-12 w-12 items-center justify-center rounded-full bg-[#FFF4DA]">
@@ -415,13 +401,21 @@ function EvaluateStudentModal({
                   <TextInput
                     editable={!loading}
                     value={field.value}
-                    onBlur={field.onBlur}
+                    onBlur={() => {
+                      field.onBlur();
+                      setFocusedField(null);
+                    }}
+                    onFocus={() => setFocusedField("feedback")}
                     onChangeText={field.onChange}
                     multiline
                     textAlignVertical="top"
                     maxLength={600}
                     placeholder="Registre uma observação sobre a viagem."
-                    className="min-h-24 rounded-2xl border border-[#E5EAF0] bg-white px-4 py-3 text-[#051223]"
+                    className="min-h-24 rounded-2xl border px-4 py-3 text-[#051223]"
+                    style={{
+                      backgroundColor: focusedField === "feedback" ? "#FFF7E8" : "#FFFFFF",
+                      borderColor: focusedField === "feedback" ? colors.accentGlow : colors.border,
+                    }}
                   />
                   {fieldState.error ? (
                     <Text className="mt-2 text-sm text-[#DC2626]">{fieldState.error.message}</Text>
@@ -436,13 +430,14 @@ function EvaluateStudentModal({
               <SystemButton
                 title="Enviar avaliação"
                 iconLeft="star"
+                variant="warning"
                 loading={loading}
                 onPress={form.handleSubmit(onSubmit)}
               />
             </View>
           </ScrollView>
         </View>
-      </KeyboardAvoidingView>
+      </View>
     </Modal>
   );
 }

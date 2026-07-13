@@ -38,40 +38,54 @@ function useHome(expectedRole: UserRole) {
     notifications,
   } = useNotifications();
   const [hasLoaded, setHasLoaded] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [qrCodeValue, setQrCodeValue] = useState<string | null>(null);
   const [qrCodeError, setQrCodeError] = useState<string | null>(null);
 
   const currentTrip = useMemo(() => myTrips.find(isActiveTrip) ?? null, [myTrips]);
 
-  const loadHome = useCallback(async () => {
-    setHasLoaded(false);
-    setQrCodeValue(null);
-    setQrCodeError(null);
-
-    const loadedUser = await loadUser();
-
-    if (!loadedUser || loadedUser.role !== expectedRole) {
-      setHasLoaded(true);
-      return;
-    }
-
-    const notificationsRequest = loadNotifications({ page: 0, size: HOME_NOTIFICATION_LIMIT });
-    const loadedTrips = await loadMyTrips();
-
-    const loadedCurrentTrip = loadedTrips?.find(isActiveTrip) ?? null;
-
-    if (expectedRole === "DRIVER" && loadedCurrentTrip) {
-      try {
-        setQrCodeValue(QrCodeService.createTripCheckInValue({ tripId: loadedCurrentTrip.id }));
-      } catch (error: unknown) {
-        setQrCodeError(getErrorMessage(error, "Não foi possível preparar o QR Code da viagem."));
-        handleError(error);
+  const loadHome = useCallback(
+    async (mode: "initial" | "refresh" = "initial") => {
+      if (mode === "refresh") {
+        setIsRefreshing(true);
+      } else {
+        setHasLoaded(false);
       }
-    }
 
-    setHasLoaded(true);
-    await notificationsRequest;
-  }, [expectedRole, loadMyTrips, loadNotifications, loadUser]);
+      setQrCodeValue(null);
+      setQrCodeError(null);
+
+      try {
+        const loadedUser = await loadUser();
+
+        if (!loadedUser || loadedUser.role !== expectedRole) {
+          return;
+        }
+
+        const notificationsRequest = loadNotifications({ page: 0, size: HOME_NOTIFICATION_LIMIT });
+        const loadedTrips = await loadMyTrips();
+
+        const loadedCurrentTrip = loadedTrips?.find(isActiveTrip) ?? null;
+
+        if (expectedRole === "DRIVER" && loadedCurrentTrip) {
+          try {
+            setQrCodeValue(QrCodeService.createTripCheckInValue({ tripId: loadedCurrentTrip.id }));
+          } catch (error: unknown) {
+            setQrCodeError(
+              getErrorMessage(error, "Não foi possível preparar o QR Code da viagem."),
+            );
+            handleError(error);
+          }
+        }
+
+        await notificationsRequest;
+      } finally {
+        setHasLoaded(true);
+        setIsRefreshing(false);
+      }
+    },
+    [expectedRole, loadMyTrips, loadNotifications, loadUser],
+  );
 
   useEffect(() => {
     void loadHome();
@@ -84,11 +98,12 @@ function useHome(expectedRole: UserRole) {
     hasLoaded,
     isLoading: isUserLoading || isTripsLoading,
     isNotificationsLoading,
+    isRefreshing,
     notifications,
     notificationsError,
     qrCodeError,
     qrCodeValue,
-    reload: loadHome,
+    reload: () => loadHome("refresh"),
     user,
   };
 }

@@ -1,6 +1,14 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import { useEffect } from "react";
-import { ActivityIndicator, Pressable, SectionList, Text, View } from "react-native";
+import { useCallback, useEffect } from "react";
+import {
+  ActivityIndicator,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  SectionList,
+  Text,
+  View,
+} from "react-native";
 import type { NotificationEntity, NotificationType } from "@/core/entity/notificationEntity";
 import { useNotifications } from "@/hooks/useNotifications";
 import { NotificationCard } from "@/presentation/shared/components/molecules/notificationCard";
@@ -100,9 +108,20 @@ function formatNotificationCount(count: number): string {
 function StudentNotifications() {
   const { notifications, isLoading, error, loadNotifications } = useNotifications();
   const sections = buildNotificationSections(notifications);
+  const handleRefresh = useCallback(() => {
+    void loadNotifications();
+  }, [loadNotifications]);
+  const refreshControl = (
+    <RefreshControl
+      refreshing={isLoading}
+      onRefresh={handleRefresh}
+      tintColor={colors.primaryGlow}
+      colors={[colors.primaryGlow]}
+    />
+  );
 
   useEffect(() => {
-    loadNotifications();
+    void loadNotifications();
   }, [loadNotifications]);
 
   return (
@@ -115,12 +134,22 @@ function StudentNotifications() {
       </View>
 
       {isLoading && notifications.length === 0 ? (
-        <View className="flex-1 items-center justify-center px-6 pb-24">
+        <ScrollView
+          className="flex-1"
+          contentContainerClassName="flex-grow items-center justify-center px-6 pb-24"
+          refreshControl={refreshControl}
+          showsVerticalScrollIndicator={false}
+        >
           <ActivityIndicator size="large" color={colors.primaryGlow} />
           <Text className="mt-4 text-center text-[#5E6A7A]">Carregando avisos...</Text>
-        </View>
+        </ScrollView>
       ) : error && notifications.length === 0 ? (
-        <View className="flex-1 items-center justify-center px-6 pb-24">
+        <ScrollView
+          className="flex-1"
+          contentContainerClassName="flex-grow items-center justify-center px-6 pb-24"
+          refreshControl={refreshControl}
+          showsVerticalScrollIndicator={false}
+        >
           <View className="h-14 w-14 items-center justify-center rounded-full bg-[#FEF2F2]">
             <MaterialIcons name="error-outline" size={28} color={colors.stateError} />
           </View>
@@ -132,14 +161,19 @@ function StudentNotifications() {
 
           <Pressable
             accessibilityRole="button"
-            onPress={() => loadNotifications()}
+            onPress={handleRefresh}
             className="mt-6 rounded-full bg-[#0D6BEE] px-6 py-3 active:opacity-85"
           >
             <Text className="font-semibold text-white">Tentar novamente</Text>
           </Pressable>
-        </View>
+        </ScrollView>
       ) : notifications.length === 0 ? (
-        <View className="flex-1 items-center justify-center px-8 pb-24">
+        <ScrollView
+          className="flex-1"
+          contentContainerClassName="flex-grow items-center justify-center px-8 pb-24"
+          refreshControl={refreshControl}
+          showsVerticalScrollIndicator={false}
+        >
           <View className="h-16 w-16 items-center justify-center rounded-full bg-[#EAF3FF]">
             <MaterialIcons name="notifications-none" size={30} color={colors.primaryGlow} />
           </View>
@@ -150,12 +184,13 @@ function StudentNotifications() {
           <Text className="mt-2 text-center text-[#5E6A7A] leading-5">
             As atualizações sobre suas viagens aparecerão nesta tela.
           </Text>
-        </View>
+        </ScrollView>
       ) : (
         <SectionList
           className="flex-1"
           sections={sections}
           keyExtractor={(notification) => notification.id}
+          refreshControl={refreshControl}
           showsVerticalScrollIndicator={false}
           stickySectionHeadersEnabled={false}
           contentContainerStyle={{

@@ -1,6 +1,6 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { type Href, Redirect, useRouter } from "expo-router";
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { QR_CODE_TYPES } from "@/core/entity/qrCodeEntity";
 import { useHome } from "@/hooks/useHome";
@@ -19,6 +19,7 @@ function StudentHomeScreen() {
     hasLoaded,
     isLoading,
     isNotificationsLoading,
+    isRefreshing,
     notifications,
     notificationsError,
     reload,
@@ -89,6 +90,14 @@ function StudentHomeScreen() {
       <ScrollView
         className="flex-1"
         contentContainerStyle={{ padding: 16, paddingBottom: 128 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={reload}
+            tintColor={colors.primaryGlow}
+            colors={[colors.primaryGlow]}
+          />
+        }
         showsVerticalScrollIndicator={false}
       >
         {error ? (

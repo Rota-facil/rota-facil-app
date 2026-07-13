@@ -406,6 +406,7 @@ function DriverTripDetailsScreen({ tripId }: DriverTripDetailsScreenProps) {
     evaluateStudent,
     initTrip,
     initTripError,
+    initTripReturn,
     isLoading: isDriverTripLoading,
     loadTripStudents,
     students,
@@ -468,12 +469,13 @@ function DriverTripDetailsScreen({ tripId }: DriverTripDetailsScreenProps) {
   }, [loadTrip, loadTripStudents, tripId]);
 
   const handleStartTrip = useCallback(async () => {
-    const startedTrip = await initTrip(tripId);
+    const startedTrip =
+      trip && isTripWaitingReturn(trip) ? await initTripReturn(tripId) : await initTrip(tripId);
 
     if (startedTrip) {
       await refreshAfterMutation();
     }
-  }, [initTrip, refreshAfterMutation, tripId]);
+  }, [initTrip, initTripReturn, refreshAfterMutation, trip, tripId]);
 
   const handleCancelTrip = useCallback(
     async (values: CancelDriverTripFormSchema) => {

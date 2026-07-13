@@ -12,6 +12,7 @@ import type {
 import { Mapper } from "@/core/mappers/mappers";
 import { TripRequest } from "@/http/request/tripRequest";
 import { UserRequest } from "@/http/request/userRequest";
+import { LocationSyncActiveTripService } from "./locationSyncActiveTripService";
 import { getRequiredAccessToken } from "./sessionTokenService";
 
 /**
@@ -61,8 +62,11 @@ const TripService = {
   async getTrip(tripId: string): Promise<TripEntity> {
     const token = await getRequiredAccessToken();
     const dto = await TripRequest.getTrip(token, tripId);
+    const trip = Mapper.trip.toEntity(dto);
 
-    return Mapper.trip.toEntity(dto);
+    await LocationSyncActiveTripService.updateFromTrip(trip);
+
+    return trip;
   },
 
   async processTripPosition(payload: ProcessTripPositionPayload): Promise<void> {
@@ -74,8 +78,21 @@ const TripService = {
   async initTrip(tripId: string): Promise<TripEntity> {
     const token = await getRequiredAccessToken();
     const dto = await TripRequest.initTrip(token, tripId);
+    const trip = Mapper.trip.toEntity(dto);
 
-    return Mapper.trip.toEntity(dto);
+    await LocationSyncActiveTripService.updateFromTrip(trip);
+
+    return trip;
+  },
+
+  async initTripReturn(tripId: string): Promise<TripEntity> {
+    const token = await getRequiredAccessToken();
+    const dto = await TripRequest.initTripReturn(token, tripId);
+    const trip = Mapper.trip.toEntity(dto);
+
+    await LocationSyncActiveTripService.updateFromTrip(trip);
+
+    return trip;
   },
 
   async cancelTrip(tripId: string, payload: CancelTripPayload): Promise<TripEntity> {
@@ -83,8 +100,11 @@ const TripService = {
     const dto = await TripRequest.cancelTrip(token, tripId, {
       reasonOfCancellation: payload.reasonOfCancellation,
     });
+    const trip = Mapper.trip.toEntity(dto);
 
-    return Mapper.trip.toEntity(dto);
+    await LocationSyncActiveTripService.updateFromTrip(trip);
+
+    return trip;
   },
 
   async getTripStudents(tripId: string): Promise<SimpleTripUserEntity[]> {

@@ -49,6 +49,28 @@ function useDriverTrips() {
     }
   }, []);
 
+  const initTripReturn = useCallback(async (tripId: string) => {
+    setIsLoading(true);
+    setError(null);
+    setInitTripError(null);
+
+    try {
+      const data = await TripService.initTripReturn(tripId);
+      setTrip(data);
+
+      return data;
+    } catch (e: unknown) {
+      const message = getErrorMessage(e, "Não foi possível iniciar o retorno.");
+
+      setError(message);
+      setInitTripError(message);
+      handleError(e);
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   const cancelTrip = useCallback(async (tripId: string, payload: CancelTripPayload) => {
     setIsLoading(true);
     setError(null);
@@ -153,6 +175,7 @@ function useDriverTrips() {
     cancelTripError,
     evaluateStudentError,
     initTrip,
+    initTripReturn,
     cancelTrip,
     sendTripPosition,
     loadTripStudents,

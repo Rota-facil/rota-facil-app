@@ -45,9 +45,11 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "O Rota Fácil utiliza sua localização para acompanhar a viagem escolar em andamento.",
-          "locationAlwaysAndWhenInUsePermission": "O Rota Fácil utiliza sua localização durante viagens ativas para compartilhar o trajeto do transporte escolar.",
-          "isAndroidBackgroundLocationEnabled": true
+          "locationWhenInUsePermission": "O Rota Fácil usa sua localização para acompanhar seu deslocamento durante o transporte escolar.",
+          "locationAlwaysAndWhenInUsePermission": "O Rota Fácil usa sua localização em segundo plano para manter o acompanhamento do transporte escolar.",
+          "isIosBackgroundLocationEnabled": true,
+          "isAndroidBackgroundLocationEnabled": true,
+          "isAndroidForegroundServiceEnabled": true
         }
       ],
       [

@@ -5,6 +5,8 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 
   return {
     ...config,
+    name: config.name ?? "rota-facil",
+    slug: config.slug ?? "rota-facil",
 
     android: {
       ...config.android,

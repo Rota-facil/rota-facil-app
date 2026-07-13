@@ -125,6 +125,7 @@ A execução consistente deste fluxo reduz conflitos, melhora a previsibilidade 
 Navegue pela documentação : 
 
 📌 [Overview](../README.md)   
-📌 [Estrutura do projeto](./docs/PROJECT_STRUCTURE.md)   
-📌 [Como executar o projeto](./docs/RUNNING.md)   
-📌 [Principais telas do aplicativo](./docs/SCREENS.md)  
+📌 [Estrutura do projeto](./PROJECT_STRUCTURE.md)   
+📌 [Como executar o projeto](./RUNNING.md)   
+📌 [Principais telas do aplicativo](./SCREENS.md)  
+📌 [Geração de Development Build com EAS](./EAS_BUILD.md)

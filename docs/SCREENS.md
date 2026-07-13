@@ -30,6 +30,7 @@ O processo de prototipação foi desenvolvido no Figma, permitindo validação a
 Navegue pela documentação : 
 
 📌 [Overview](../README.md)   
-📌 [Como contribuir](./docs/CONTRIBUTING.md)   
-📌 [Estrutura do projeto](./docs/PROJECT_STRUCTURE.md)   
-📌 [Como executar o projeto](./docs/RUNNING.md)   
+📌 [Como contribuir](./CONTRIBUTING.md)   
+📌 [Estrutura do projeto](./PROJECT_STRUCTURE.md)   
+📌 [Como executar o projeto](./RUNNING.md)   
+📌 [Geração de Development Build com EAS](./EAS_BUILD.md)

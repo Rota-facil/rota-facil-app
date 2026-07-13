@@ -1,9 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { TripEntity, TripProgress } from "@/core/entity/tripEntity";
 import type { UserRole } from "@/core/entity/userEntity";
-import { QrCodeService } from "@/core/service/qrCodeService";
-import { getErrorMessage } from "@/errors/getErrorMessage";
-import { handleError } from "@/errors/handleError";
 import { useNotifications } from "./useNotifications";
 import { useTrips } from "./useTrips";
 import { useUser } from "./useUser";
@@ -23,10 +20,14 @@ function isActiveTrip(trip: TripEntity): boolean {
   return currentProgress !== undefined && ACTIVE_TRIP_PROGRESS.has(currentProgress);
 }
 
+function selectHomeTrip(trips: TripEntity[]): TripEntity | null {
+  return trips.find(isActiveTrip) ?? trips[0] ?? null;
+}
+
 /**
  * Compõe os dados remotos necessários às Homes sem expor DTOs ou regras visuais.
- * A viagem vigente é escolhida entre as viagens do usuário usando exclusivamente
- * o último TripProgress, conforme a regra de status já adotada pelo fluxo de viagens.
+ * A Home prioriza a viagem vigente, mas mantém a viagem vinculada disponível
+ * para que aluno e motorista tenham contexto antes do início da rota.
  */
 function useHome(expectedRole: UserRole) {
   const { error: userError, isLoading: isUserLoading, loadUser, user } = useUser();
@@ -38,40 +39,36 @@ function useHome(expectedRole: UserRole) {
     notifications,
   } = useNotifications();
   const [hasLoaded, setHasLoaded] = useState(false);
-  const [qrCodeValue, setQrCodeValue] = useState<string | null>(null);
-  const [qrCodeError, setQrCodeError] = useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const currentTrip = useMemo(() => myTrips.find(isActiveTrip) ?? null, [myTrips]);
+  const currentTrip = useMemo(() => selectHomeTrip(myTrips), [myTrips]);
 
-  const loadHome = useCallback(async () => {
-    setHasLoaded(false);
-    setQrCodeValue(null);
-    setQrCodeError(null);
-
-    const loadedUser = await loadUser();
-
-    if (!loadedUser || loadedUser.role !== expectedRole) {
-      setHasLoaded(true);
-      return;
-    }
-
-    const notificationsRequest = loadNotifications({ page: 0, size: HOME_NOTIFICATION_LIMIT });
-    const loadedTrips = await loadMyTrips();
-
-    const loadedCurrentTrip = loadedTrips?.find(isActiveTrip) ?? null;
-
-    if (expectedRole === "DRIVER" && loadedCurrentTrip) {
-      try {
-        setQrCodeValue(QrCodeService.createTripCheckInValue({ tripId: loadedCurrentTrip.id }));
-      } catch (error: unknown) {
-        setQrCodeError(getErrorMessage(error, "Não foi possível preparar o QR Code da viagem."));
-        handleError(error);
+  const loadHome = useCallback(
+    async (mode: "initial" | "refresh" = "initial") => {
+      if (mode === "refresh") {
+        setIsRefreshing(true);
+      } else {
+        setHasLoaded(false);
       }
-    }
 
-    setHasLoaded(true);
-    await notificationsRequest;
-  }, [expectedRole, loadMyTrips, loadNotifications, loadUser]);
+      try {
+        const loadedUser = await loadUser();
+
+        if (!loadedUser || loadedUser.role !== expectedRole) {
+          return;
+        }
+
+        const notificationsRequest = loadNotifications({ page: 0, size: HOME_NOTIFICATION_LIMIT });
+        await loadMyTrips();
+
+        await notificationsRequest;
+      } finally {
+        setHasLoaded(true);
+        setIsRefreshing(false);
+      }
+    },
+    [expectedRole, loadMyTrips, loadNotifications, loadUser],
+  );
 
   useEffect(() => {
     void loadHome();
@@ -84,11 +81,10 @@ function useHome(expectedRole: UserRole) {
     hasLoaded,
     isLoading: isUserLoading || isTripsLoading,
     isNotificationsLoading,
+    isRefreshing,
     notifications,
     notificationsError,
-    qrCodeError,
-    qrCodeValue,
-    reload: loadHome,
+    reload: () => loadHome("refresh"),
     user,
   };
 }

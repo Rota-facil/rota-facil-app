@@ -1,6 +1,7 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { Pressable, Text, View } from "react-native";
 import { getTripTimeLabel, type TripMapViewModel } from "@/hooks/tripMapModel";
+import { getStatusColor } from "@/presentation/shared/components/molecules/tripCard/utils";
 import { colors } from "@/presentation/shared/styles/colors";
 
 interface TripMapHeaderProps {
@@ -10,6 +11,7 @@ interface TripMapHeaderProps {
 
 function TripMapHeader({ viewModel, onRefresh }: TripMapHeaderProps) {
   const { trip } = viewModel;
+  const statusColor = getStatusColor(trip);
 
   return (
     <View className="rounded-[28px] bg-white/95 p-4 shadow-sm shadow-blue-100">
@@ -19,9 +21,18 @@ function TripMapHeader({ viewModel, onRefresh }: TripMapHeaderProps) {
         </View>
 
         <View className="min-w-0 flex-1">
+          <Text className="text-[10px] font-bold uppercase text-[#64748B]">Viagem atual</Text>
           <Text className="font-bold text-base text-[#051223]" numberOfLines={1}>
             {trip.name || trip.route.name}
           </Text>
+          <View
+            className={`mt-2 self-start flex-row items-center rounded-full px-3 py-1 ${statusColor.background}`}
+          >
+            <View className={`mr-1.5 h-2 w-2 rounded-full ${statusColor.dot}`} />
+            <Text className={`text-[11px] font-bold ${statusColor.text}`}>
+              {viewModel.statusLabel}
+            </Text>
+          </View>
         </View>
 
         <Pressable

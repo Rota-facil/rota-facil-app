@@ -53,7 +53,7 @@ export default function LoginScreen() {
             contentContainerStyle={{ flexGrow: 1, paddingBottom: scrollBottomPadding }}
             showsVerticalScrollIndicator={false}
           >
-            <View className="pt-6">
+            <View>
               <LinearGradient
                 colors={["#102A72", colors.primary, "#1565D8", colors.primaryGlow]}
                 start={{ x: 0, y: 0 }}

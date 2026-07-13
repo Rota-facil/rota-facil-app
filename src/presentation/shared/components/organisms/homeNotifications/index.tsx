@@ -23,21 +23,28 @@ const notificationIcons: Record<
 
 function HomeNotifications({ error, isLoading, notifications, onViewAll }: HomeNotificationsProps) {
   return (
-    <View className="mt-7">
+    <View className="mt-8">
       <View className="mb-3 flex-row items-center justify-between">
-        <Text className="font-bold text-[#051223]">Últimos avisos</Text>
-        <Pressable accessibilityRole="button" onPress={onViewAll} className="px-2 py-1">
+        <View>
+          <Text className="font-bold text-[#051223] text-lg">Últimos avisos</Text>
+          <Text className="mt-0.5 text-[#5E6A7A] text-xs">Atualizações da sua operação</Text>
+        </View>
+        <Pressable
+          accessibilityRole="button"
+          onPress={onViewAll}
+          className="rounded-full bg-[#EAF3FF] px-3 py-2 active:opacity-85"
+        >
           <Text className="font-bold text-[#0D6BEE] text-xs">Ver todos</Text>
         </Pressable>
       </View>
 
       {isLoading && notifications.length === 0 ? (
-        <View className="items-center rounded-[24px] bg-white px-5 py-8">
+        <View className="items-center rounded-[24px] bg-white px-5 py-8 shadow-sm shadow-blue-100">
           <ActivityIndicator color={colors.primaryGlow} />
           <Text className="mt-3 text-[#5E6A7A] text-sm">Carregando avisos...</Text>
         </View>
       ) : error && notifications.length === 0 ? (
-        <View className="flex-row items-start rounded-[24px] border border-red-100 bg-white p-4">
+        <View className="flex-row items-start rounded-[24px] border border-red-100 bg-white p-4 shadow-sm shadow-blue-100">
           <MaterialIcons name="error-outline" size={22} color={colors.stateError} />
           <View className="ml-3 flex-1">
             <Text className="font-semibold text-[#051223]">Avisos indisponíveis</Text>
@@ -47,7 +54,7 @@ function HomeNotifications({ error, isLoading, notifications, onViewAll }: HomeN
           </View>
         </View>
       ) : notifications.length === 0 ? (
-        <View className="items-center rounded-[24px] bg-white px-5 py-7">
+        <View className="items-center rounded-[24px] bg-white px-5 py-7 shadow-sm shadow-blue-100">
           <MaterialIcons name="notifications-none" size={28} color={colors.muted} />
           <Text className="mt-3 font-semibold text-[#051223]">Nenhum aviso recente</Text>
           <Text className="mt-1 text-center text-[#5E6A7A] text-sm">

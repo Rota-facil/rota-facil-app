@@ -93,6 +93,12 @@ const TripRequest = {
     });
   },
 
+  async initTripReturn(accessToken: string, tripId: string): Promise<TripResponseDTO> {
+    return httpClient.post<TripResponseDTO>(`/transports/trips/${tripId}/return/init`, undefined, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+  },
+
   async cancelTrip(
     accessToken: string,
     tripId: string,

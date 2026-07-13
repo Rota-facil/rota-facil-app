@@ -3,7 +3,17 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Modal, Pressable, Text, TextInput, View } from "react-native";
+import {
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { SimpleTripUserEntity } from "@/core/entity/tripEntity";
 import { QrCodeService } from "@/core/service/qrCodeService";
 import { useDriverTrips } from "@/hooks/useDriverTrips";
@@ -25,9 +35,15 @@ import {
   getTripDetailsPermissions,
   isTripWaitingReturn,
 } from "@/presentation/shared/components/templates/tripDetailsTemplate/utils";
+import {
+  useKeyboardHeight,
+  useKeyboardVisible,
+} from "@/presentation/shared/hooks/useKeyboardVisible";
 import { colors } from "@/presentation/shared/styles/colors";
+import { MODAL_BOTTOM_SAFE_PADDING } from "@/presentation/shared/styles/layout";
 
 interface DriverTripDetailsScreenProps {
+  readonly shouldOpenQrCode?: boolean;
   readonly tripId: string;
 }
 
@@ -133,6 +149,9 @@ function CancelTripModal({
   readonly onSubmit: (values: CancelDriverTripFormSchema) => void;
   readonly visible: boolean;
 }) {
+  const insets = useSafeAreaInsets();
+  const keyboardHeight = useKeyboardHeight();
+  const isKeyboardVisible = keyboardHeight > 0;
   const form = useForm<CancelDriverTripFormSchema>({
     resolver: zodResolver(cancelDriverTripSchema),
     defaultValues: {
@@ -147,81 +166,93 @@ function CancelTripModal({
   }, [form, visible]);
 
   const reason = form.watch("reasonOfCancellation");
+  const bottomPadding = isKeyboardVisible
+    ? Math.max(insets.bottom, MODAL_BOTTOM_SAFE_PADDING)
+    : MODAL_BOTTOM_SAFE_PADDING;
+  const bottomOffset = isKeyboardVisible ? keyboardHeight : 0;
+  const cancelTripSheet = (
+    <View
+      className="max-h-[92%] rounded-t-[28px] bg-white px-6 pt-5"
+      style={{ marginBottom: bottomOffset, paddingBottom: bottomPadding }}
+    >
+      <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+        <View className="mb-5 flex-row items-start justify-between">
+          <View className="mr-4 flex-1">
+            <View className="mb-4 h-12 w-12 items-center justify-center rounded-full bg-red-50">
+              <MaterialIcons name="warning-amber" size={26} color={colors.stateError} />
+            </View>
+            <Text className="font-bold text-xl text-[#051223]">Cancelar viagem</Text>
+            <Text className="mt-2 text-sm text-[#5E6A7A] leading-5">
+              Informe o motivo do cancelamento. Esta informação será enviada à prefeitura.
+            </Text>
+          </View>
+
+          <Pressable
+            disabled={loading}
+            onPress={onClose}
+            className="h-10 w-10 items-center justify-center rounded-full bg-[#F1F5F9]"
+          >
+            <MaterialIcons name="close" size={22} color={colors.muted} />
+          </Pressable>
+        </View>
+
+        <Controller
+          control={form.control}
+          name="reasonOfCancellation"
+          render={({ field, fieldState }) => (
+            <View>
+              <Text className="mb-2 text-sm font-semibold text-[#5E6A7A]">MOTIVO *</Text>
+              <TextInput
+                editable={!loading}
+                value={field.value}
+                onBlur={field.onBlur}
+                onChangeText={field.onChange}
+                multiline
+                textAlignVertical="top"
+                maxLength={600}
+                placeholder="Ex.: Problema mecânico no veículo, condições climáticas..."
+                className="min-h-32 rounded-2xl border border-[#E5EAF0] bg-white px-4 py-3 text-[#051223]"
+              />
+              <Text className="mt-2 text-xs text-[#5E6A7A]">{reason.trim().length}/600</Text>
+              {fieldState.error ? (
+                <Text className="mt-2 text-sm text-[#DC2626]">{fieldState.error.message}</Text>
+              ) : null}
+            </View>
+          )}
+        />
+
+        {error ? <Text className="mt-3 text-sm text-[#DC2626]">{error}</Text> : null}
+
+        <View className="mt-5 flex-row gap-3">
+          <View className="flex-1">
+            <SystemButton
+              title="Voltar"
+              variant="white"
+              disabled={loading}
+              onPress={onClose}
+              hideIcon
+            />
+          </View>
+          <View className="flex-1">
+            <SystemButton
+              title="Confirmar"
+              variant="danger"
+              loading={loading}
+              onPress={form.handleSubmit(onSubmit)}
+              hideIcon
+            />
+          </View>
+        </View>
+      </ScrollView>
+    </View>
+  );
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <View className="flex-1 justify-end bg-black/45">
         <Pressable className="flex-1" disabled={loading} onPress={onClose} />
 
-        <View className="rounded-t-[28px] bg-white px-6 pb-7 pt-5">
-          <View className="mb-5 flex-row items-start justify-between">
-            <View className="mr-4 flex-1">
-              <View className="mb-4 h-12 w-12 items-center justify-center rounded-full bg-red-50">
-                <MaterialIcons name="warning-amber" size={26} color={colors.stateError} />
-              </View>
-              <Text className="font-bold text-xl text-[#051223]">Cancelar viagem</Text>
-              <Text className="mt-2 text-sm text-[#5E6A7A] leading-5">
-                Informe o motivo do cancelamento. Esta informação será enviada à prefeitura.
-              </Text>
-            </View>
-
-            <Pressable
-              disabled={loading}
-              onPress={onClose}
-              className="h-10 w-10 items-center justify-center rounded-full bg-[#F1F5F9]"
-            >
-              <MaterialIcons name="close" size={22} color={colors.muted} />
-            </Pressable>
-          </View>
-
-          <Controller
-            control={form.control}
-            name="reasonOfCancellation"
-            render={({ field, fieldState }) => (
-              <View>
-                <Text className="mb-2 text-sm font-semibold text-[#5E6A7A]">MOTIVO *</Text>
-                <TextInput
-                  editable={!loading}
-                  value={field.value}
-                  onBlur={field.onBlur}
-                  onChangeText={field.onChange}
-                  multiline
-                  textAlignVertical="top"
-                  maxLength={600}
-                  placeholder="Ex.: Problema mecânico no veículo, condições climáticas..."
-                  className="min-h-32 rounded-2xl border border-[#E5EAF0] bg-white px-4 py-3 text-[#051223]"
-                />
-                <Text className="mt-2 text-xs text-[#5E6A7A]">{reason.trim().length}/600</Text>
-                {fieldState.error ? (
-                  <Text className="mt-2 text-sm text-[#DC2626]">{fieldState.error.message}</Text>
-                ) : null}
-              </View>
-            )}
-          />
-
-          {error ? <Text className="mt-3 text-sm text-[#DC2626]">{error}</Text> : null}
-
-          <View className="mt-5 flex-row gap-3">
-            <View className="flex-1">
-              <SystemButton
-                title="Voltar"
-                variant="white"
-                disabled={loading}
-                onPress={onClose}
-                hideIcon
-              />
-            </View>
-            <View className="flex-1">
-              <SystemButton
-                title="Confirmar"
-                variant="danger"
-                loading={loading}
-                onPress={form.handleSubmit(onSubmit)}
-                hideIcon
-              />
-            </View>
-          </View>
-        </View>
+        {cancelTripSheet}
       </View>
     </Modal>
   );
@@ -236,13 +267,17 @@ function CheckInQrCodeModal({
   readonly tripId: string;
   readonly visible: boolean;
 }) {
+  const insets = useSafeAreaInsets();
   const qrCodeValue = useMemo(() => QrCodeService.createTripCheckInValue({ tripId }), [tripId]);
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <View className="flex-1 justify-end bg-black/45">
         <Pressable className="flex-1" onPress={onClose} />
-        <View className="max-h-[88%] rounded-t-[28px] bg-[#F7FBFC] px-6 pb-7 pt-5">
+        <View
+          className="max-h-[88%] rounded-t-[28px] bg-[#F7FBFC] px-6 pt-5"
+          style={{ paddingBottom: Math.max(insets.bottom, MODAL_BOTTOM_SAFE_PADDING) }}
+        >
           <View className="mb-4 flex-row justify-end">
             <Pressable
               accessibilityRole="button"
@@ -281,6 +316,8 @@ function EvaluateStudentModal({
   readonly onSubmit: (values: EvaluateTripStudentFormSchema) => void;
   readonly student: SimpleTripUserEntity | null;
 }) {
+  const insets = useSafeAreaInsets();
+  const isKeyboardVisible = useKeyboardVisible();
   const form = useForm<EvaluateTripStudentFormSchema>({
     resolver: zodResolver(evaluateTripStudentSchema),
     defaultValues: {
@@ -299,105 +336,121 @@ function EvaluateStudentModal({
 
   return (
     <Modal visible={Boolean(student)} transparent animationType="fade" onRequestClose={onClose}>
-      <View className="flex-1 justify-end bg-black/45">
-        <Pressable className="flex-1" disabled={loading} onPress={onClose} />
+      <KeyboardAvoidingView
+        enabled={isKeyboardVisible}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        className="flex-1"
+      >
+        <View className="flex-1 justify-end bg-black/45">
+          <Pressable className="flex-1" disabled={loading} onPress={onClose} />
 
-        <View className="rounded-t-[28px] bg-white px-6 pb-7 pt-5">
-          <View className="mb-5 flex-row items-start justify-between">
-            <View className="mr-4 flex-1">
-              <View className="mb-4 h-12 w-12 items-center justify-center rounded-full bg-[#FFF4DA]">
-                <MaterialIcons name="star" size={28} color={colors.accentGlow} />
+          <ScrollView
+            className="max-h-[92%] rounded-t-[28px] bg-white px-6 pt-5"
+            contentContainerStyle={{
+              paddingBottom: Math.max(insets.bottom, MODAL_BOTTOM_SAFE_PADDING),
+            }}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            <View className="mb-5 flex-row items-start justify-between">
+              <View className="mr-4 flex-1">
+                <View className="mb-4 h-12 w-12 items-center justify-center rounded-full bg-[#FFF4DA]">
+                  <MaterialIcons name="star" size={28} color={colors.accentGlow} />
+                </View>
+                <Text className="font-bold text-xl text-[#051223]">Avaliar aluno</Text>
+                <Text className="mt-2 font-semibold text-[#051223]">{student?.user.name}</Text>
+                <Text className="mt-0.5 text-sm text-[#5E6A7A]">{student?.institutionName}</Text>
               </View>
-              <Text className="font-bold text-xl text-[#051223]">Avaliar aluno</Text>
-              <Text className="mt-2 font-semibold text-[#051223]">{student?.user.name}</Text>
-              <Text className="mt-0.5 text-sm text-[#5E6A7A]">{student?.institutionName}</Text>
+
+              <Pressable
+                disabled={loading}
+                onPress={onClose}
+                className="h-10 w-10 items-center justify-center rounded-full bg-[#F1F5F9]"
+              >
+                <MaterialIcons name="close" size={22} color={colors.muted} />
+              </Pressable>
             </View>
 
-            <Pressable
-              disabled={loading}
-              onPress={onClose}
-              className="h-10 w-10 items-center justify-center rounded-full bg-[#F1F5F9]"
-            >
-              <MaterialIcons name="close" size={22} color={colors.muted} />
-            </Pressable>
-          </View>
-
-          <Controller
-            control={form.control}
-            name="note"
-            render={({ fieldState }) => (
-              <View>
-                <Text className="mb-2 text-sm font-semibold text-[#5E6A7A]">
-                  COMPORTAMENTO NA VIAGEM
-                </Text>
-                <View className="flex-row gap-2">
-                  {[1, 2, 3, 4, 5].map((value) => (
-                    <Pressable
-                      key={value}
-                      accessibilityRole="button"
-                      accessibilityLabel={`Selecionar nota ${value}`}
-                      disabled={loading}
-                      onPress={() => form.setValue("note", value, { shouldValidate: true })}
-                      className="h-11 w-11 items-center justify-center rounded-full bg-[#F8FAFC]"
-                    >
-                      <MaterialIcons
-                        name={value <= note ? "star" : "star-border"}
-                        size={28}
-                        color={value <= note ? colors.accentGlow : colors.muted}
-                      />
-                    </Pressable>
-                  ))}
+            <Controller
+              control={form.control}
+              name="note"
+              render={({ fieldState }) => (
+                <View>
+                  <Text className="mb-2 text-sm font-semibold text-[#5E6A7A]">
+                    COMPORTAMENTO NA VIAGEM
+                  </Text>
+                  <View className="flex-row gap-2">
+                    {[1, 2, 3, 4, 5].map((value) => (
+                      <Pressable
+                        key={value}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Selecionar nota ${value}`}
+                        disabled={loading}
+                        onPress={() => form.setValue("note", value, { shouldValidate: true })}
+                        className="h-11 w-11 items-center justify-center rounded-full bg-[#F8FAFC]"
+                      >
+                        <MaterialIcons
+                          name={value <= note ? "star" : "star-border"}
+                          size={28}
+                          color={value <= note ? colors.accentGlow : colors.muted}
+                        />
+                      </Pressable>
+                    ))}
+                  </View>
+                  {fieldState.error ? (
+                    <Text className="mt-2 text-sm text-[#DC2626]">{fieldState.error.message}</Text>
+                  ) : null}
                 </View>
-                {fieldState.error ? (
-                  <Text className="mt-2 text-sm text-[#DC2626]">{fieldState.error.message}</Text>
-                ) : null}
-              </View>
-            )}
-          />
-
-          <Controller
-            control={form.control}
-            name="feedback"
-            render={({ field, fieldState }) => (
-              <View className="mt-4">
-                <Text className="mb-2 text-sm font-semibold text-[#5E6A7A]">
-                  Comentário (opcional)
-                </Text>
-                <TextInput
-                  editable={!loading}
-                  value={field.value}
-                  onBlur={field.onBlur}
-                  onChangeText={field.onChange}
-                  multiline
-                  textAlignVertical="top"
-                  maxLength={600}
-                  placeholder="Registre uma observação sobre a viagem."
-                  className="min-h-24 rounded-2xl border border-[#E5EAF0] bg-white px-4 py-3 text-[#051223]"
-                />
-                {fieldState.error ? (
-                  <Text className="mt-2 text-sm text-[#DC2626]">{fieldState.error.message}</Text>
-                ) : null}
-              </View>
-            )}
-          />
-
-          {error ? <Text className="mt-3 text-sm text-[#DC2626]">{error}</Text> : null}
-
-          <View className="mt-5">
-            <SystemButton
-              title="Enviar avaliação"
-              iconLeft="star"
-              loading={loading}
-              onPress={form.handleSubmit(onSubmit)}
+              )}
             />
-          </View>
+
+            <Controller
+              control={form.control}
+              name="feedback"
+              render={({ field, fieldState }) => (
+                <View className="mt-4">
+                  <Text className="mb-2 text-sm font-semibold text-[#5E6A7A]">
+                    Comentário (opcional)
+                  </Text>
+                  <TextInput
+                    editable={!loading}
+                    value={field.value}
+                    onBlur={field.onBlur}
+                    onChangeText={field.onChange}
+                    multiline
+                    textAlignVertical="top"
+                    maxLength={600}
+                    placeholder="Registre uma observação sobre a viagem."
+                    className="min-h-24 rounded-2xl border border-[#E5EAF0] bg-white px-4 py-3 text-[#051223]"
+                  />
+                  {fieldState.error ? (
+                    <Text className="mt-2 text-sm text-[#DC2626]">{fieldState.error.message}</Text>
+                  ) : null}
+                </View>
+              )}
+            />
+
+            {error ? <Text className="mt-3 text-sm text-[#DC2626]">{error}</Text> : null}
+
+            <View className="mt-5">
+              <SystemButton
+                title="Enviar avaliação"
+                iconLeft="star"
+                loading={loading}
+                onPress={form.handleSubmit(onSubmit)}
+              />
+            </View>
+          </ScrollView>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
 
-function DriverTripDetailsScreen({ tripId }: DriverTripDetailsScreenProps) {
+function DriverTripDetailsScreen({
+  shouldOpenQrCode = false,
+  tripId,
+}: DriverTripDetailsScreenProps) {
   const { error: tripError, isLoading: isTripLoading, loadTrip, trip } = useTrips();
   const {
     cancelTrip,
@@ -406,6 +459,7 @@ function DriverTripDetailsScreen({ tripId }: DriverTripDetailsScreenProps) {
     evaluateStudent,
     initTrip,
     initTripError,
+    initTripReturn,
     isLoading: isDriverTripLoading,
     loadTripStudents,
     students,
@@ -416,6 +470,7 @@ function DriverTripDetailsScreen({ tripId }: DriverTripDetailsScreenProps) {
   const [isQrCodeModalVisible, setIsQrCodeModalVisible] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<SimpleTripUserEntity | null>(null);
   const [hasLoadedDetails, setHasLoadedDetails] = useState(false);
+  const [hasHandledInitialQrCode, setHasHandledInitialQrCode] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const loadDetails = useCallback(
@@ -463,17 +518,37 @@ function DriverTripDetailsScreen({ tripId }: DriverTripDetailsScreenProps) {
   const isLoading = (isTripLoading || isUserLoading) && !trip;
   const isActionLoading = isDriverTripLoading;
 
+  useEffect(() => {
+    if (
+      !shouldOpenQrCode ||
+      hasHandledInitialQrCode ||
+      !hasLoadedDetails ||
+      !permissions?.canShowCheckInQrCode
+    ) {
+      return;
+    }
+
+    setIsQrCodeModalVisible(true);
+    setHasHandledInitialQrCode(true);
+  }, [
+    hasHandledInitialQrCode,
+    hasLoadedDetails,
+    permissions?.canShowCheckInQrCode,
+    shouldOpenQrCode,
+  ]);
+
   const refreshAfterMutation = useCallback(async () => {
     await Promise.all([loadTrip(tripId), loadTripStudents(tripId)]);
   }, [loadTrip, loadTripStudents, tripId]);
 
   const handleStartTrip = useCallback(async () => {
-    const startedTrip = await initTrip(tripId);
+    const startedTrip =
+      trip && isTripWaitingReturn(trip) ? await initTripReturn(tripId) : await initTrip(tripId);
 
     if (startedTrip) {
       await refreshAfterMutation();
     }
-  }, [initTrip, refreshAfterMutation, tripId]);
+  }, [initTrip, initTripReturn, refreshAfterMutation, trip, tripId]);
 
   const handleCancelTrip = useCallback(
     async (values: CancelDriverTripFormSchema) => {
@@ -535,9 +610,7 @@ function DriverTripDetailsScreen({ tripId }: DriverTripDetailsScreenProps) {
         roleActions={
           permissions ? (
             <View className="gap-3">
-              {permissions.canStartTrip && initTripError ? (
-                <DriverOperationAlert message={initTripError} />
-              ) : null}
+              {initTripError ? <DriverOperationAlert message={initTripError} /> : null}
 
               <DriverActions
                 canCancelTrip={permissions.canCancelTrip}

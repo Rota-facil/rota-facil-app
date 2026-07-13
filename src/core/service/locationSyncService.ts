@@ -3,7 +3,10 @@ import type { LocationBatchEntity } from "@/core/entity/userLocationEntity";
 import { BackgroundError, HttpClientError, HttpServerError, SoftError } from "@/errors/errors";
 import { handleError } from "@/errors/handleError";
 import { LocationSyncActiveTripService } from "./locationSyncActiveTripService";
-import { LOCATION_SYNC_MAX_ATTEMPTS_PER_ITEM } from "./locationSyncConfig";
+import {
+  LOCATION_SYNC_FLUSH_BATCH_LIMIT,
+  LOCATION_SYNC_MAX_ATTEMPTS_PER_ITEM,
+} from "./locationSyncConfig";
 import {
   createPendingLocationSyncItem,
   LocationSyncQueueService,
@@ -59,23 +62,28 @@ const LocationSyncService = {
         return { pendingItems: 0, status: "synced" };
       }
 
-      const remainingItems: PendingLocationSyncItem[] = [];
+      const itemsToProcess = queue.slice(0, LOCATION_SYNC_FLUSH_BATCH_LIMIT);
+      const processedItemIds = new Set(itemsToProcess.map((item) => item.id));
+      const remainingProcessedItems: PendingLocationSyncItem[] = [];
 
-      for (const item of queue) {
+      for (const item of itemsToProcess) {
         const result = await syncQueueItem(item);
 
         if (result === "synced" || result === "discarded") {
           continue;
         }
 
-        remainingItems.push(result);
+        remainingProcessedItems.push(result);
       }
 
-      await LocationSyncQueueService.replaceQueue(remainingItems);
+      const nextQueue = await LocationSyncQueueService.reconcileProcessedItems(
+        processedItemIds,
+        remainingProcessedItems,
+      );
 
       return {
-        pendingItems: remainingItems.length,
-        status: remainingItems.length === 0 ? "synced" : "queued",
+        pendingItems: nextQueue.length,
+        status: nextQueue.length === 0 ? "synced" : "queued",
       };
     } finally {
       isFlushingQueue = false;

@@ -51,6 +51,19 @@ const LocationSyncQueueService = {
     await StorageService.save(STORAGE_KEYS.LOCATION_SYNC_QUEUE, trimQueue(queue));
   },
 
+  async reconcileProcessedItems(
+    processedItemIds: ReadonlySet<string>,
+    remainingProcessedItems: readonly PendingLocationSyncItem[],
+  ): Promise<PendingLocationSyncItem[]> {
+    const currentQueue = await this.getQueue();
+    const untouchedItems = currentQueue.filter((item) => !processedItemIds.has(item.id));
+    const nextQueue = trimQueue([...remainingProcessedItems, ...untouchedItems]);
+
+    await this.replaceQueue(nextQueue);
+
+    return nextQueue;
+  },
+
   async clear(): Promise<void> {
     await StorageService.remove(STORAGE_KEYS.LOCATION_SYNC_QUEUE);
   },

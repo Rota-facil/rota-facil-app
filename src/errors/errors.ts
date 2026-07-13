@@ -79,6 +79,22 @@ class QrCodeError extends SoftError {
   }
 }
 
+type LocationTrackingErrorCode =
+  | "PERMISSION_DENIED"
+  | "SERVICES_DISABLED"
+  | "TASK_UNAVAILABLE"
+  | "UNKNOWN";
+
+class LocationTrackingError extends SoftError {
+  constructor(
+    public readonly code: LocationTrackingErrorCode,
+    message: string,
+  ) {
+    super(message);
+    this.name = "LocationTrackingError";
+  }
+}
+
 /**
  * We will use this error when we want to just log data to the sentry/crashlytics but not show user any popup
  * For example, on listing screen, we are calling a secondary api to load ad, it
@@ -106,5 +122,13 @@ class StorageError extends ApplicationError {
   }
 }
 
-export type { QrCodeErrorCode };
-export { BackgroundError, HttpClientError, HttpServerError, QrCodeError, SoftError, StorageError };
+export type { LocationTrackingErrorCode, QrCodeErrorCode };
+export {
+  BackgroundError,
+  HttpClientError,
+  HttpServerError,
+  LocationTrackingError,
+  QrCodeError,
+  SoftError,
+  StorageError,
+};

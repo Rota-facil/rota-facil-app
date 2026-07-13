@@ -537,9 +537,7 @@ function DriverTripDetailsScreen({ tripId }: DriverTripDetailsScreenProps) {
         roleActions={
           permissions ? (
             <View className="gap-3">
-              {permissions.canStartTrip && initTripError ? (
-                <DriverOperationAlert message={initTripError} />
-              ) : null}
+              {initTripError ? <DriverOperationAlert message={initTripError} /> : null}
 
               <DriverActions
                 canCancelTrip={permissions.canCancelTrip}

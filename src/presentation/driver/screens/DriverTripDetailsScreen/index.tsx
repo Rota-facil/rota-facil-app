@@ -43,6 +43,7 @@ import { colors } from "@/presentation/shared/styles/colors";
 import { MODAL_BOTTOM_SAFE_PADDING } from "@/presentation/shared/styles/layout";
 
 interface DriverTripDetailsScreenProps {
+  readonly shouldOpenQrCode?: boolean;
   readonly tripId: string;
 }
 
@@ -446,7 +447,10 @@ function EvaluateStudentModal({
   );
 }
 
-function DriverTripDetailsScreen({ tripId }: DriverTripDetailsScreenProps) {
+function DriverTripDetailsScreen({
+  shouldOpenQrCode = false,
+  tripId,
+}: DriverTripDetailsScreenProps) {
   const { error: tripError, isLoading: isTripLoading, loadTrip, trip } = useTrips();
   const {
     cancelTrip,
@@ -466,6 +470,7 @@ function DriverTripDetailsScreen({ tripId }: DriverTripDetailsScreenProps) {
   const [isQrCodeModalVisible, setIsQrCodeModalVisible] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<SimpleTripUserEntity | null>(null);
   const [hasLoadedDetails, setHasLoadedDetails] = useState(false);
+  const [hasHandledInitialQrCode, setHasHandledInitialQrCode] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const loadDetails = useCallback(
@@ -512,6 +517,25 @@ function DriverTripDetailsScreen({ tripId }: DriverTripDetailsScreenProps) {
   const startTripTitle = trip && isTripWaitingReturn(trip) ? "Iniciar retorno" : "Iniciar viagem";
   const isLoading = (isTripLoading || isUserLoading) && !trip;
   const isActionLoading = isDriverTripLoading;
+
+  useEffect(() => {
+    if (
+      !shouldOpenQrCode ||
+      hasHandledInitialQrCode ||
+      !hasLoadedDetails ||
+      !permissions?.canShowCheckInQrCode
+    ) {
+      return;
+    }
+
+    setIsQrCodeModalVisible(true);
+    setHasHandledInitialQrCode(true);
+  }, [
+    hasHandledInitialQrCode,
+    hasLoadedDetails,
+    permissions?.canShowCheckInQrCode,
+    shouldOpenQrCode,
+  ]);
 
   const refreshAfterMutation = useCallback(async () => {
     await Promise.all([loadTrip(tripId), loadTripStudents(tripId)]);

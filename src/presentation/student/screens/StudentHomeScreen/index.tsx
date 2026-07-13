@@ -9,6 +9,10 @@ import { GreetingCard } from "@/presentation/shared/components/molecules/greetin
 import { HomeTripCard } from "@/presentation/shared/components/molecules/homeTripCard";
 import { NoActiveTripCard } from "@/presentation/shared/components/molecules/noActiveTripCard";
 import { HomeNotifications } from "@/presentation/shared/components/organisms/homeNotifications";
+import {
+  getTripStatusLabel,
+  isTripInProgress,
+} from "@/presentation/shared/components/templates/tripDetailsTemplate/utils";
 import { colors } from "@/presentation/shared/styles/colors";
 import { TAB_SCREEN_SCROLL_BOTTOM_PADDING } from "@/presentation/shared/styles/layout";
 
@@ -62,6 +66,13 @@ function StudentHomeScreen() {
   }
 
   const openTrips = () => router.push("/(private)/students/trips");
+  const openCurrentTripDetails = () => {
+    if (!currentTrip) {
+      return;
+    }
+
+    router.push(`/(private)/students/trips/${encodeURIComponent(currentTrip.id)}` as Href);
+  };
   const openCheckIn = () => {
     if (!currentTrip) {
       return;
@@ -78,6 +89,7 @@ function StudentHomeScreen() {
 
     router.push(`/(private)/qr-code/scan?${params.toString()}` as Href);
   };
+  const hasTripInProgress = currentTrip ? isTripInProgress(currentTrip) : false;
 
   return (
     <SafeAreaView className="flex-1 bg-[#F7FBFC]" edges={["top"]}>
@@ -85,6 +97,10 @@ function StudentHomeScreen() {
         greeting="Olá,"
         userName={user.name}
         organization={user.prefecture.name}
+        summaryDescription={currentTrip ? getTripStatusLabel(currentTrip) : undefined}
+        summaryIcon="route"
+        summaryLabel={currentTrip ? "Rota vinculada" : undefined}
+        summaryValue={currentTrip?.route.name}
         onPressNotification={() => router.push("/(private)/students/notifications")}
       />
 
@@ -102,7 +118,7 @@ function StudentHomeScreen() {
         showsVerticalScrollIndicator={false}
       >
         {error ? (
-          <View className="-mt-5 rounded-[28px] border border-red-100 bg-white p-5 shadow-sm">
+          <View className="-mt-6 rounded-[28px] border border-red-100 bg-white p-5 shadow-sm">
             <MaterialIcons name="error-outline" size={28} color={colors.stateError} />
             <Text className="mt-3 font-bold text-[#051223] text-lg">Viagem indisponível</Text>
             <Text className="mt-2 text-[#5E6A7A]">{error}</Text>
@@ -118,31 +134,44 @@ function StudentHomeScreen() {
             trip={currentTrip}
             detailLabel="Motorista e veículo"
             detailValue={`${currentTrip.bus.driver.name} · ${currentTrip.bus.plate || "Placa não informada"}`}
-            onPress={() =>
-              router.push(`/(private)/students/trips/${encodeURIComponent(currentTrip.id)}` as Href)
-            }
+            onPress={openCurrentTripDetails}
           />
         ) : (
           <NoActiveTripCard onViewTrips={openTrips} />
         )}
 
         {currentTrip && !error ? (
-          <View className="mt-5 flex-row gap-3">
-            <View className="flex-1">
+          <View className="mt-5 gap-3">
+            {hasTripInProgress ? (
+              <View className="flex-row gap-3">
+                <View className="flex-1">
+                  <ActionCard
+                    title="Check-in"
+                    subtitle="Escanear QR Code"
+                    icon="qr-code-scanner"
+                    variant="accent"
+                    onPress={openCheckIn}
+                  />
+                </View>
+                <View className="flex-1">
+                  <ActionCard
+                    title="Mapa"
+                    subtitle="Acompanhar ônibus"
+                    icon="location-on"
+                    variant="primary"
+                    onPress={() => router.push("/(private)/students/map")}
+                  />
+                </View>
+              </View>
+            ) : null}
+
+            <View>
               <ActionCard
-                title="Check-in"
-                subtitle="Escanear QR Code"
-                icon="qr-code-scanner"
-                onPress={openCheckIn}
-              />
-            </View>
-            <View className="flex-1">
-              <ActionCard
-                title="Mapa"
-                subtitle="Acompanhar viagem"
-                icon="location-on"
-                variant="accent"
-                onPress={() => router.push("/(private)/students/map")}
+                title="Detalhes da viagem"
+                subtitle="Rota, horários e participação"
+                icon="directions-bus"
+                variant="neutral"
+                onPress={openCurrentTripDetails}
               />
             </View>
           </View>

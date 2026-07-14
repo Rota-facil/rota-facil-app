@@ -11,7 +11,7 @@ import type { CreateUserDTO } from "@/http/dto/createUserDTO";
 import type { CompleteGoogleRegistrationRequestDTO, LoginDTO } from "@/http/dto/loginDTO";
 import { useSessionActions } from "./useSessionActions";
 
-const privateRoute = "/(private)" as Href;
+const privateRoute = "/(private)/students/home" as Href;
 const googleCompleteLoginRoute = "/(auth)/complete-login" as const;
 const googleOAuthCallbackBaseUrl = Linking.createURL("auth", {
   isTripleSlashed: false,

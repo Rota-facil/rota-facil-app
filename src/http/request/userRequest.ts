@@ -30,7 +30,7 @@ export const UserRequest = {
     payload: EvaluateUserRequestDTO,
   ): Promise<EvaluateUserResponseDTO> {
     return httpClient.post<EvaluateUserResponseDTO>(
-      `/transports/users/${userId}/evaluate`,
+      `/transports/feedbacks/${userId}/evaluate`,
       payload,
       {
         headers: { Authorization: `Bearer ${accessToken}` },

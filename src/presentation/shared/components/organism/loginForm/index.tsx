@@ -27,7 +27,7 @@ export function LoginForm({
 }: LoginFormProps) {
   return (
     <View className="flex flex-col flex-1 p-5">
-      <View className="flex mt-8 flex-col gap-7">
+      <View className="flex flex-col gap-7">
         <FormInput
           control={control}
           name="email"
@@ -62,7 +62,7 @@ export function LoginForm({
         <GoogleButton title="Continuar com Google" onPress={onGoogleLogin} loading={loading} />
       </View>
 
-      <View className="mt-auto flex-row justify-center">
+      <View className="mt-auto pt-8 flex-row justify-center">
         <Text className="text-[#5E6A7A]">Não tem conta?</Text>
 
         <SystemLink href="/(auth)/register" replace>

@@ -1,11 +1,16 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import type { ReactNode } from "react";
+import type { ComponentProps, ReactNode } from "react";
 import { ActivityIndicator, FlatList, Pressable, RefreshControl, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Svg, { Path } from "react-native-svg";
 import type { SimpleTripUserEntity, TripEntity, TripPresence } from "@/core/entity/tripEntity";
+import {
+  type TripRouteProgressPoint,
+  TripRouteProgressService,
+} from "@/core/service/tripRouteProgressService";
 import { SystemButton } from "@/presentation/shared/components/atoms/systemButton";
 import { colors } from "@/presentation/shared/styles/colors";
+import { TAB_SCREEN_SCROLL_BOTTOM_PADDING } from "@/presentation/shared/styles/layout";
 import {
   formatTripTime,
   getPrimaryBoardPointName,
@@ -259,26 +264,30 @@ function TripHeader({
 
       <TripMapPreview trip={trip} />
 
-      <View className="flex-row items-start justify-between gap-3 rounded-[28px] bg-white p-5 shadow-sm shadow-blue-100">
-        <View className="flex-1">
-          <Text className="text-[11px] font-bold uppercase text-[#64748B]">
-            Status atual da viagem
-          </Text>
-          <Text className="mt-1 font-bold text-xl text-[#051223]">{getTripStatusLabel(trip)}</Text>
-          <Text className="mt-1 text-sm text-[#5E6A7A]">
-            Placa {trip.bus.plate || "não informada"}
-          </Text>
-        </View>
+      {context === "driver" ? (
+        <View className="flex-row items-start justify-between gap-3 rounded-[28px] bg-white p-5 shadow-sm shadow-blue-100">
+          <View className="flex-1">
+            <Text className="text-[11px] font-bold uppercase text-[#64748B]">
+              Status atual da viagem
+            </Text>
+            <Text className="mt-1 font-bold text-xl text-[#051223]">
+              {getTripStatusLabel(trip)}
+            </Text>
+            <Text className="mt-1 text-sm text-[#5E6A7A]">
+              Placa {trip.bus.plate || "não informada"}
+            </Text>
+          </View>
 
-        <View
-          className={`flex-row items-center rounded-full px-3 py-1 ${statusClasses.background}`}
-        >
-          <View className={`mr-1.5 h-2 w-2 rounded-full ${statusClasses.dot}`} />
-          <Text className={`text-[11px] font-bold ${statusClasses.text}`}>
-            {getTripStatusLabel(trip)}
-          </Text>
+          <View
+            className={`flex-row items-center rounded-full px-3 py-1 ${statusClasses.background}`}
+          >
+            <View className={`mr-1.5 h-2 w-2 rounded-full ${statusClasses.dot}`} />
+            <Text className={`text-[11px] font-bold ${statusClasses.text}`}>
+              {getTripStatusLabel(trip)}
+            </Text>
+          </View>
         </View>
-      </View>
+      ) : null}
     </View>
   );
 }
@@ -288,7 +297,7 @@ function MetricCard({
   label,
   value,
 }: {
-  readonly icon: React.ComponentProps<typeof MaterialIcons>["name"];
+  readonly icon: ComponentProps<typeof MaterialIcons>["name"];
   readonly label: string;
   readonly value: string;
 }) {
@@ -301,6 +310,10 @@ function MetricCard({
   );
 }
 
+function getRouteDirectionLabel(direction: "going" | "returning"): string {
+  return direction === "returning" ? "Volta" : "Ida";
+}
+
 function TripProgressPanel({
   trip,
   students,
@@ -308,30 +321,47 @@ function TripProgressPanel({
   readonly trip: TripEntity;
   readonly students: SimpleTripUserEntity[];
 }) {
-  const summary = getProgressSummary(students, trip.students);
+  const presenceSummary = getProgressSummary(students, trip.students);
+  const routeProgress = TripRouteProgressService.calculate(trip);
+  const shouldShowProgress =
+    routeProgress.currentProgress !== "NOT_STARTED" &&
+    routeProgress.currentProgress !== "CANCELLED" &&
+    routeProgress.currentProgress !== "RETURN_FINISHED";
 
-  if (!isTripInProgress(trip)) {
+  if (!shouldShowProgress) {
     return null;
   }
 
   return (
     <View className="rounded-[28px] bg-white p-5 shadow-sm shadow-blue-100">
       <View className="flex-row items-center justify-between">
-        <Text className="text-[11px] font-bold uppercase text-[#64748B]">Progresso da viagem</Text>
-        <Text className="font-bold text-lg text-[#051223]">{summary.percentage}%</Text>
+        <Text className="text-[11px] font-bold uppercase text-[#64748B]">Progresso da rota</Text>
+        <Text className="font-bold text-lg text-[#051223]">{routeProgress.percentage}%</Text>
       </View>
 
       <View className="mt-4 h-3 overflow-hidden rounded-full bg-[#E5EAF0]">
         <View
           className="h-full rounded-full bg-[#3B82F6]"
-          style={{ width: `${summary.percentage}%` }}
+          style={{ width: `${routeProgress.percentage}%` }}
         />
       </View>
 
       <View className="mt-4 flex-row gap-2">
-        <MetricCard icon="check-circle" label="Presentes" value={String(summary.checkedIn)} />
-        <MetricCard icon="schedule" label="Pendentes" value={String(summary.pending)} />
-        <MetricCard icon="priority-high" label="Ausentes" value={String(summary.absent)} />
+        <MetricCard
+          icon="sync-alt"
+          label="Sentido"
+          value={getRouteDirectionLabel(routeProgress.direction)}
+        />
+        <MetricCard
+          icon="route"
+          label="Pontos"
+          value={`${routeProgress.completedPoints}/${routeProgress.progressTotalPoints}`}
+        />
+        <MetricCard
+          icon="how-to-reg"
+          label="Check-ins"
+          value={`${presenceSummary.checkedIn}/${presenceSummary.total}`}
+        />
       </View>
     </View>
   );
@@ -373,7 +403,7 @@ function SummaryTab({
   readonly trip: TripEntity;
   readonly students: SimpleTripUserEntity[];
 }) {
-  const summary = getProgressSummary(students, trip.students);
+  const presenceSummary = getProgressSummary(students, trip.students);
   const boardPointName = getPrimaryBoardPointName(trip);
   const institutionName = getPrimaryInstitutionName(trip);
 
@@ -390,11 +420,11 @@ function SummaryTab({
 
         <View className="mt-4 flex-row gap-2">
           <MetricCard icon="schedule" label="Ida" value={formatTripTime(trip.route.going)} />
-          <MetricCard icon="group" label="Alunos" value={String(summary.total)} />
+          <MetricCard icon="group" label="Alunos" value={String(presenceSummary.total)} />
           <MetricCard
             icon="how-to-reg"
             label="Check-ins"
-            value={`${summary.checkedIn}/${summary.total}`}
+            value={`${presenceSummary.checkedIn}/${presenceSummary.total}`}
           />
         </View>
       </View>
@@ -543,10 +573,10 @@ function DriverStudentListItem({
           <Pressable
             accessibilityRole="button"
             onPress={() => onEvaluate(student)}
-            className="flex-row items-center rounded-full bg-[#FFF4DA] px-3 py-2 active:opacity-80"
+            className="flex-row items-center rounded-full bg-[#FBBF24] px-3 py-2 active:opacity-80"
           >
-            <MaterialIcons name="star" size={16} color={colors.accentGlow} />
-            <Text className="ml-1.5 text-xs font-bold text-[#92400E]">Avaliar</Text>
+            <MaterialIcons name="star" size={16} color="#1F2937" />
+            <Text className="ml-1.5 text-xs font-bold text-[#1F2937]">Avaliar</Text>
           </Pressable>
         ) : null}
       </View>
@@ -554,15 +584,60 @@ function DriverStudentListItem({
   );
 }
 
-function RouteTab({ trip }: { readonly trip: TripEntity }) {
-  const boardPoints = trip.route.boardPoints;
+function getRoutePointKindLabel(kind: TripRouteProgressPoint["kind"]): string {
+  return kind === "institution" ? "Instituição" : "Ponto de embarque";
+}
 
-  if (boardPoints.length === 0) {
+function getRoutePointStatusLabel(status: TripRouteProgressPoint["status"]): string {
+  if (status === "completed") {
+    return "Passado";
+  }
+
+  if (status === "current") {
+    return "Atual";
+  }
+
+  return "Pendente";
+}
+
+function getRoutePointVisuals(status: TripRouteProgressPoint["status"]): {
+  readonly backgroundColor: string;
+  readonly color: string;
+  readonly icon: ComponentProps<typeof MaterialIcons>["name"];
+} {
+  if (status === "completed") {
+    return {
+      backgroundColor: "#DCFCE7",
+      color: "#16A34A",
+      icon: "check-circle",
+    };
+  }
+
+  if (status === "current") {
+    return {
+      backgroundColor: "#EAF3FF",
+      color: colors.primaryGlow,
+      icon: "directions-bus",
+    };
+  }
+
+  return {
+    backgroundColor: "#F8FAFC",
+    color: colors.border,
+    icon: "radio-button-unchecked",
+  };
+}
+
+function RouteTab({ trip }: { readonly trip: TripEntity }) {
+  const routeProgress = TripRouteProgressService.calculate(trip);
+  const routePoints = routeProgress.points;
+
+  if (routePoints.length === 0) {
     return (
       <View className="rounded-[28px] bg-white p-5 shadow-sm shadow-blue-100">
         <Text className="font-bold text-xl text-[#051223]">Rota indisponível</Text>
         <Text className="mt-2 text-[#5E6A7A]">
-          Nenhum ponto de embarque foi informado para esta viagem.
+          Nenhum ponto de rota foi informado para esta viagem.
         </Text>
       </View>
     );
@@ -570,33 +645,35 @@ function RouteTab({ trip }: { readonly trip: TripEntity }) {
 
   return (
     <View className="rounded-[28px] bg-white p-5 shadow-sm shadow-blue-100">
-      <Text className="text-[11px] font-bold uppercase text-[#64748B]">Sequência de paradas</Text>
+      <View className="flex-row items-center justify-between gap-3">
+        <Text className="text-[11px] font-bold uppercase text-[#64748B]">Sequência da rota</Text>
+        <Text className="text-[11px] font-bold uppercase text-[#0D6BEE]">
+          {getRouteDirectionLabel(routeProgress.direction)}
+        </Text>
+      </View>
 
       <View className="mt-4">
-        {boardPoints.map((point, index) => {
-          const isLast = index === boardPoints.length - 1;
-          const isCurrent = isTripInProgress(trip) && index === 0;
-          const markerColor = isCurrent ? colors.primaryGlow : colors.border;
+        {routePoints.map((point, index) => {
+          const isLast = index === routePoints.length - 1;
+          const visuals = getRoutePointVisuals(point.status);
 
           return (
-            <View key={point.id} className="flex-row">
+            <View key={`${point.kind}-${point.id}`} className="flex-row">
               <View className="items-center">
                 <View
                   className="h-8 w-8 items-center justify-center rounded-full"
-                  style={{ backgroundColor: isCurrent ? "#EAF3FF" : "#F8FAFC" }}
+                  style={{ backgroundColor: visuals.backgroundColor }}
                 >
-                  <MaterialIcons
-                    name={isCurrent ? "directions-bus" : "radio-button-unchecked"}
-                    size={18}
-                    color={markerColor}
-                  />
+                  <MaterialIcons name={visuals.icon} size={18} color={visuals.color} />
                 </View>
                 {!isLast ? <View className="h-10 w-px bg-[#E5EAF0]" /> : null}
               </View>
 
               <View className="ml-3 flex-1 pb-5">
                 <Text className="font-bold text-base text-[#051223]">{point.name}</Text>
-                <Text className="mt-0.5 text-sm text-[#5E6A7A]">Parada {index + 1}</Text>
+                <Text className="mt-0.5 text-sm text-[#5E6A7A]">
+                  {getRoutePointKindLabel(point.kind)} · {getRoutePointStatusLabel(point.status)}
+                </Text>
               </View>
             </View>
           );
@@ -637,7 +714,12 @@ function TripDetailsTemplate({
       <FlatList
         data={listData}
         keyExtractor={(student) => student.id}
-        contentContainerClassName="px-6 pt-4 pb-32 gap-4"
+        contentContainerStyle={{
+          gap: 16,
+          paddingBottom: TAB_SCREEN_SCROLL_BOTTOM_PADDING,
+          paddingHorizontal: 24,
+          paddingTop: 16,
+        }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
@@ -650,7 +732,7 @@ function TripDetailsTemplate({
         ListHeaderComponent={
           <View className="gap-4">
             <TripHeader context={context} trip={trip} onBack={onBack} />
-            <TripProgressPanel trip={trip} students={students} />
+            {context === "driver" ? <TripProgressPanel trip={trip} students={students} /> : null}
             <TripTabs activeTab={activeTab} onTabChange={onTabChange} />
 
             {activeTab === "summary" ? <SummaryTab trip={trip} students={students} /> : null}

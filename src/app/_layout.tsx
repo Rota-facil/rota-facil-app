@@ -1,6 +1,7 @@
 import { Stack } from "expo-router";
 import "./global.css";
 import { SessionProvider } from "@/context/provider/sessionProvider";
+import "@/core/service/locationTrackingTask";
 
 const Layout: React.FC = () => {
   return (

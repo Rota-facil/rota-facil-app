@@ -7,4 +7,9 @@ interface LoginResponseDTO {
   accessToken: string;
 }
 
-export type { LoginDTO, LoginResponseDTO };
+interface CompleteGoogleRegistrationRequestDTO {
+  cpf: string;
+  prefectureId: string;
+}
+
+export type { CompleteGoogleRegistrationRequestDTO, LoginDTO, LoginResponseDTO };

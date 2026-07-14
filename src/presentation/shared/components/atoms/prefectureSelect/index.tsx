@@ -2,8 +2,10 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useState } from "react";
 import { type Control, Controller, type FieldValues, get, type Path } from "react-hook-form";
 import { FlatList, Modal, Pressable, Text, TouchableOpacity, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { PrefectureEntity } from "@/core/entity/prefectureEntity";
 import { colors } from "@/presentation/shared/styles/colors";
+import { MODAL_BOTTOM_SAFE_PADDING } from "@/presentation/shared/styles/layout";
 
 interface PrefectureSelectProps<T extends FieldValues> {
   control: Control<T>;
@@ -12,6 +14,7 @@ interface PrefectureSelectProps<T extends FieldValues> {
   placeholder: string;
   prefectures: PrefectureEntity[];
   loading?: boolean;
+  disabled?: boolean;
   error?: string | null;
 }
 
@@ -22,8 +25,10 @@ function PrefectureSelect<T extends FieldValues>({
   placeholder,
   prefectures,
   loading = false,
+  disabled = false,
   error,
 }: PrefectureSelectProps<T>) {
+  const insets = useSafeAreaInsets();
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -43,7 +48,7 @@ function PrefectureSelect<T extends FieldValues>({
 
             <TouchableOpacity
               activeOpacity={0.85}
-              disabled={loading}
+              disabled={loading || disabled}
               onPress={() => setIsOpen(true)}
               className="h-14 flex-row items-center rounded-2xl border px-4"
               style={{
@@ -84,7 +89,10 @@ function PrefectureSelect<T extends FieldValues>({
                 className="flex-1 justify-end bg-black/40"
                 onPress={() => setIsOpen(false)}
               >
-                <Pressable className="max-h-[72%] rounded-t-3xl bg-white p-5">
+                <Pressable
+                  className="max-h-[72%] rounded-t-3xl bg-white px-5 pt-5"
+                  style={{ paddingBottom: Math.max(insets.bottom, MODAL_BOTTOM_SAFE_PADDING) }}
+                >
                   <View className="mb-4 flex-row items-center justify-between">
                     <View>
                       <Text className="font-bold text-lg text-[#051223]">

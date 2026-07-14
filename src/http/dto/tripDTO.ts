@@ -8,7 +8,7 @@ type TripProgressDTO =
   | "RETURN_FINISHED"
   | "INSTITUTION_ARRIVAL"
   | "BOARD_POINT_ARRIVAL";
-type TripPresenceDTO = "CHECKIN" | "PENDING" | "ABSENT";
+type TripPresenceDTO = "CHECKIN" | "PENDING" | "ABSENT" | "Check-in" | "Pendente" | "Ausente";
 type TripShiftDTO = "MORNING" | "AFTERNOON" | "NIGHT";
 
 interface JoinUserInTripRequestDTO {

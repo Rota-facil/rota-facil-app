@@ -1,7 +1,8 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { View } from "react-native";
+import { ScrollView, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { OnboardingCard } from "../components/atoms/overviewCard";
 import { PaginationDots } from "../components/atoms/paginationDots";
 import { SystemButton } from "../components/atoms/systemButton";
@@ -32,39 +33,48 @@ export default function OverviewScreen() {
       end={{ x: 1, y: 0 }}
       className="flex flex-1"
     >
-      <View className="flex-1 px-6 pb-8 justify-between">
-        <View className="mt-6">
-          <OnboardingHeader onSkip={() => replace("/(auth)/login")} showSkip={!isLastSlide} />
-        </View>
+      <SafeAreaView className="flex-1" edges={["top", "bottom"]}>
+        <ScrollView
+          contentContainerStyle={{
+            flexGrow: 1,
+            paddingBottom: 24,
+            paddingHorizontal: 24,
+          }}
+          showsVerticalScrollIndicator={false}
+        >
+          <View className="flex-1 justify-between">
+            <OnboardingHeader onSkip={() => replace("/(auth)/login")} showSkip={!isLastSlide} />
 
-        {currentSlide.iconType === "material" ? (
-          <OnboardingCard
-            title={currentSlide.title}
-            description={currentSlide.description}
-            iconName={currentSlide.iconName}
-            iconType="material"
-            gradientColors={currentSlide.gradientColors}
-          />
-        ) : (
-          <OnboardingCard
-            title={currentSlide.title}
-            description={currentSlide.description}
-            iconName={currentSlide.iconName}
-            iconType="feather"
-            gradientColors={currentSlide.gradientColors}
-          />
-        )}
+            {currentSlide.iconType === "material" ? (
+              <OnboardingCard
+                title={currentSlide.title}
+                description={currentSlide.description}
+                iconName={currentSlide.iconName}
+                iconType="material"
+                gradientColors={currentSlide.gradientColors}
+              />
+            ) : (
+              <OnboardingCard
+                title={currentSlide.title}
+                description={currentSlide.description}
+                iconName={currentSlide.iconName}
+                iconType="feather"
+                gradientColors={currentSlide.gradientColors}
+              />
+            )}
 
-        <View>
-          <PaginationDots total={Slides.length} currentIndex={currentIndex} />
+            <View>
+              <PaginationDots total={Slides.length} currentIndex={currentIndex} />
 
-          <SystemButton
-            title={isLastSlide ? "Começar" : "Continuar"}
-            onPress={handleNext}
-            iconRight="chevron-right"
-          />
-        </View>
-      </View>
+              <SystemButton
+                title={isLastSlide ? "Começar" : "Continuar"}
+                onPress={handleNext}
+                iconRight="chevron-right"
+              />
+            </View>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
     </LinearGradient>
   );
 }

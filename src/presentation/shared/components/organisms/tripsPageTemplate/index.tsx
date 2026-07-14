@@ -3,8 +3,10 @@ import { FlatList, RefreshControl, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import type { TripEntity } from "@/core/entity/tripEntity";
 import { colors } from "@/presentation/shared/styles/colors";
+import { TAB_SCREEN_SCROLL_BOTTOM_PADDING } from "@/presentation/shared/styles/layout";
 import { TripCard } from "../../molecules/tripCard";
 import { TripsStateView } from "../../molecules/tripsStateView";
+import TripsHeaderCard from "./tripsHeaderCard";
 
 interface TripsPageTemplateProps {
   trips: TripEntity[];
@@ -42,13 +44,19 @@ function TripsPageTemplate({
   const shouldShowInitialLoading = isInitialLoading && trips.length === 0;
   const shouldShowError = Boolean(error) && trips.length === 0;
   const shouldShowEmpty = !isInitialLoading && !error && trips.length === 0;
+  const title = context === "driver" ? "Suas operações" : "Suas viagens";
 
   return (
     <SafeAreaView className="flex-1 bg-[#F7FBFC]" edges={["top"]}>
       <FlatList
         data={trips}
         keyExtractor={(trip) => trip.id}
-        contentContainerClassName="px-6 pt-4 pb-32 gap-4"
+        contentContainerStyle={{
+          gap: 16,
+          paddingBottom: TAB_SCREEN_SCROLL_BOTTOM_PADDING,
+          paddingHorizontal: 24,
+          paddingTop: 16,
+        }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
@@ -60,6 +68,8 @@ function TripsPageTemplate({
         }
         ListHeaderComponent={
           <View className="gap-4">
+            <TripsHeaderCard title={title} />
+
             {children}
 
             {shouldShowInitialLoading ? (

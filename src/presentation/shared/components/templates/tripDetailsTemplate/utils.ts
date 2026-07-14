@@ -25,6 +25,7 @@ interface TripDetailsPermissions {
   readonly canCheckIn: boolean;
   readonly canShowCheckInQrCode: boolean;
   readonly canOpenNavigation: boolean;
+  readonly canRateDriver: boolean;
   readonly canRateStudents: boolean;
 }
 
@@ -176,6 +177,7 @@ function getTripDetailsPermissions(params: {
     canCheckIn: isJoinedStudent && inProgress && params.studentPresence !== "CHECKIN" && !cancelled,
     canShowCheckInQrCode: isDriver && inProgress,
     canOpenNavigation: isDriver && inProgress,
+    canRateDriver: isJoinedStudent && (finished || cancelled),
     canRateStudents: isDriver && finished,
   };
 }

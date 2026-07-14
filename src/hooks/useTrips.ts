@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import type { EvaluateUserPayload, EvaluationEntity } from "@/core/entity/evaluationEntity";
 import type {
   JoinTripPayload,
   TripEntity,
@@ -6,6 +7,7 @@ import type {
   TripPageEntity,
   TripUserEntity,
 } from "@/core/entity/tripEntity";
+import { STORAGE_KEYS, StorageService } from "@/core/service/storageService";
 import { TripService } from "@/core/service/tripService";
 import { getErrorMessage } from "@/errors/getErrorMessage";
 import { handleError } from "@/errors/handleError";
@@ -22,8 +24,10 @@ function useTrips() {
   const [myTrips, setMyTrips] = useState<TripEntity[]>([]);
   const [trip, setTrip] = useState<TripEntity | null>(null);
   const [tripUser, setTripUser] = useState<TripUserEntity | null>(null);
+  const [evaluation, setEvaluation] = useState<EvaluationEntity | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [evaluateDriverError, setEvaluateDriverError] = useState<string | null>(null);
 
   const loadTrips = useCallback(async (params?: TripListParams) => {
     setIsLoading(true);
@@ -69,6 +73,7 @@ function useTrips() {
     try {
       const data = await TripService.getTrip(tripId);
       setTrip(data);
+      void saveLastAccessedTripId(data.id);
 
       return data;
     } catch (e: unknown) {
@@ -134,17 +139,43 @@ function useTrips() {
     }
   }, []);
 
+  const evaluateDriver = useCallback(async (userId: string, payload: EvaluateUserPayload) => {
+    setIsLoading(true);
+    setError(null);
+    setEvaluateDriverError(null);
+
+    try {
+      const data = await TripService.evaluateDriver(userId, payload);
+      setEvaluation(data);
+
+      return data;
+    } catch (e: unknown) {
+      const message = getErrorMessage(e, "Não foi possível avaliar o motorista.");
+
+      setError(message);
+      setEvaluateDriverError(message);
+      handleError(e);
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   const clearTrip = useCallback(() => {
     setTrip(null);
     setTripUser(null);
+    setEvaluation(null);
     setError(null);
+    setEvaluateDriverError(null);
   }, []);
 
   const clearTrips = useCallback(() => {
     setTrips([]);
     setTripsPage(null);
     setMyTrips([]);
+    setEvaluation(null);
     setError(null);
+    setEvaluateDriverError(null);
   }, []);
 
   return {
@@ -154,17 +185,28 @@ function useTrips() {
     myTripsPage: null,
     trip,
     tripUser,
+    evaluation,
     isLoading,
     error,
+    evaluateDriverError,
     loadTrips,
     loadMyTrips,
     loadTrip,
     joinTrip,
     exitTrip,
     checkInTrip,
+    evaluateDriver,
     clearTrip,
     clearTrips,
   };
+}
+
+async function saveLastAccessedTripId(tripId: string): Promise<void> {
+  try {
+    await StorageService.save<string>(STORAGE_KEYS.LAST_ACCESSED_TRIP_ID, tripId);
+  } catch (error: unknown) {
+    handleError(error);
+  }
 }
 
 export { useTrips };

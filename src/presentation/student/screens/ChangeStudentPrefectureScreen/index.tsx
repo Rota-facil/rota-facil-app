@@ -11,6 +11,7 @@ import { useUser } from "@/hooks/useUser";
 import { PrefectureSelect } from "@/presentation/shared/components/atoms/prefectureSelect";
 import { SystemButton } from "@/presentation/shared/components/atoms/systemButton";
 import { colors } from "@/presentation/shared/styles/colors";
+import { TAB_SCREEN_SCROLL_BOTTOM_PADDING } from "@/presentation/shared/styles/layout";
 import {
   type StudentPrefectureFormSchema,
   studentPrefectureSchema,
@@ -83,7 +84,7 @@ function ChangeStudentPrefectureScreen() {
   return (
     <SafeAreaView className="flex-1 bg-[#F7FBFC]" edges={["top", "bottom"]}>
       <ScrollView
-        contentContainerStyle={{ paddingBottom: 132 }}
+        contentContainerStyle={{ paddingBottom: TAB_SCREEN_SCROLL_BOTTOM_PADDING }}
         showsVerticalScrollIndicator={false}
       >
         <LinearGradient

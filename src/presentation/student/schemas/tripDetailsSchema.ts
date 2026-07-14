@@ -5,6 +5,17 @@ const joinTripSchema = z.object({
   institutionId: z.string("Instituição obrigatória").min(1, "Selecione a instituição"),
 });
 
-type JoinTripFormSchema = z.infer<typeof joinTripSchema>;
+const evaluateTripDriverSchema = z.object({
+  feedback: z.string().trim().max(600, "Informe no máximo 600 caracteres").optional(),
+  note: z.number().min(1, "Selecione uma nota").max(5, "Selecione uma nota válida"),
+});
 
-export { type JoinTripFormSchema, joinTripSchema };
+type JoinTripFormSchema = z.infer<typeof joinTripSchema>;
+type EvaluateTripDriverFormSchema = z.infer<typeof evaluateTripDriverSchema>;
+
+export {
+  type EvaluateTripDriverFormSchema,
+  evaluateTripDriverSchema,
+  type JoinTripFormSchema,
+  joinTripSchema,
+};

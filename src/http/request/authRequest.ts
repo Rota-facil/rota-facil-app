@@ -20,7 +20,7 @@ export const AuthRequest = {
   },
 
   getGoogleStudentAuthUrl(): string {
-    return `${config.apiBaseUrl}/auth/oauth2/authorization/google-student`;
+    return `${config.apiBaseUrlGoogle}/auth/oauth2/authorization/google-student`;
   },
 
   async completeGoogleRegistration(

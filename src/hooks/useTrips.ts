@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import type { EvaluateUserPayload, EvaluationEntity } from "@/core/entity/evaluationEntity";
 import type {
   JoinTripPayload,
   TripEntity,
@@ -23,8 +24,10 @@ function useTrips() {
   const [myTrips, setMyTrips] = useState<TripEntity[]>([]);
   const [trip, setTrip] = useState<TripEntity | null>(null);
   const [tripUser, setTripUser] = useState<TripUserEntity | null>(null);
+  const [evaluation, setEvaluation] = useState<EvaluationEntity | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [evaluateDriverError, setEvaluateDriverError] = useState<string | null>(null);
 
   const loadTrips = useCallback(async (params?: TripListParams) => {
     setIsLoading(true);
@@ -136,17 +139,43 @@ function useTrips() {
     }
   }, []);
 
+  const evaluateDriver = useCallback(async (userId: string, payload: EvaluateUserPayload) => {
+    setIsLoading(true);
+    setError(null);
+    setEvaluateDriverError(null);
+
+    try {
+      const data = await TripService.evaluateDriver(userId, payload);
+      setEvaluation(data);
+
+      return data;
+    } catch (e: unknown) {
+      const message = getErrorMessage(e, "Não foi possível avaliar o motorista.");
+
+      setError(message);
+      setEvaluateDriverError(message);
+      handleError(e);
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   const clearTrip = useCallback(() => {
     setTrip(null);
     setTripUser(null);
+    setEvaluation(null);
     setError(null);
+    setEvaluateDriverError(null);
   }, []);
 
   const clearTrips = useCallback(() => {
     setTrips([]);
     setTripsPage(null);
     setMyTrips([]);
+    setEvaluation(null);
     setError(null);
+    setEvaluateDriverError(null);
   }, []);
 
   return {
@@ -156,14 +185,17 @@ function useTrips() {
     myTripsPage: null,
     trip,
     tripUser,
+    evaluation,
     isLoading,
     error,
+    evaluateDriverError,
     loadTrips,
     loadMyTrips,
     loadTrip,
     joinTrip,
     exitTrip,
     checkInTrip,
+    evaluateDriver,
     clearTrip,
     clearTrips,
   };

@@ -1,7 +1,6 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import type { NotificationEntity, NotificationType } from "@/core/entity/notificationEntity";
-import { NotificationCard } from "@/presentation/shared/components/molecules/notificationCard";
 import { colors } from "@/presentation/shared/styles/colors";
 
 interface HomeNotificationsProps {
@@ -19,6 +18,41 @@ const notificationIcons: Record<
   TRIP_FINISHED: "check-circle-outline",
   TRIP_CANCELLED: "error-outline",
   STUDENT_CHECKIN: "how-to-reg",
+};
+
+const notificationVisuals: Record<
+  NotificationType,
+  {
+    readonly accent: string;
+    readonly background: string;
+    readonly iconBackground: string;
+    readonly label: string;
+  }
+> = {
+  TRIP_STARTED: {
+    accent: colors.primary,
+    background: "#FFFFFF",
+    iconBackground: "#EAF3FF",
+    label: "Viagem iniciada",
+  },
+  TRIP_FINISHED: {
+    accent: "#15803D",
+    background: "#FFFFFF",
+    iconBackground: "#ECFDF3",
+    label: "Viagem finalizada",
+  },
+  TRIP_CANCELLED: {
+    accent: "#B91C1C",
+    background: "#FFFFFF",
+    iconBackground: "#FFF1F2",
+    label: "Viagem cancelada",
+  },
+  STUDENT_CHECKIN: {
+    accent: "#B45309",
+    background: "#FFFFFF",
+    iconBackground: "#FFF7E8",
+    label: "Check-in",
+  },
 };
 
 function HomeNotifications({ error, isLoading, notifications, onViewAll }: HomeNotificationsProps) {
@@ -62,19 +96,72 @@ function HomeNotifications({ error, isLoading, notifications, onViewAll }: HomeN
           </Text>
         </View>
       ) : (
-        <View className="gap-2">
+        <View className="gap-3">
           {notifications.map((notification) => (
-            <NotificationCard
-              key={notification.id}
-              title={notification.title}
-              description={notification.message}
-              icon={notificationIcons[notification.notificationType]}
-            />
+            <HomeNotificationItem key={notification.id} notification={notification} />
           ))}
         </View>
       )}
     </View>
   );
+}
+
+function HomeNotificationItem({ notification }: { readonly notification: NotificationEntity }) {
+  const visual = notificationVisuals[notification.notificationType];
+
+  return (
+    <View
+      className="overflow-hidden rounded-[24px] border p-4 shadow-sm shadow-blue-100"
+      style={{
+        backgroundColor: visual.background,
+        borderColor: colors.border,
+      }}
+    >
+      <View className="flex-row items-start gap-3">
+        <View
+          className="h-11 w-11 items-center justify-center rounded-2xl"
+          style={{ backgroundColor: visual.iconBackground }}
+        >
+          <MaterialIcons
+            name={notificationIcons[notification.notificationType]}
+            size={23}
+            color={visual.accent}
+          />
+        </View>
+
+        <View className="min-w-0 flex-1">
+          <View className="flex-row flex-wrap items-center gap-2">
+            <Text className="font-bold text-[10px] uppercase" style={{ color: visual.accent }}>
+              {visual.label}
+            </Text>
+            <Text className="font-semibold text-[#64748B] text-[10px] uppercase">
+              {formatNotificationDate(notification.createdAt)}
+            </Text>
+          </View>
+
+          <Text className="mt-1 font-bold text-[#051223] text-base leading-5">
+            {notification.title}
+          </Text>
+          <Text className="mt-2 text-[#5E6A7A] text-sm leading-5">{notification.message}</Text>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+function formatNotificationDate(value: string): string {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Recente";
+  }
+
+  return new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    month: "2-digit",
+  }).format(date);
 }
 
 export { HomeNotifications };

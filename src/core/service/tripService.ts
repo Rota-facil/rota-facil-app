@@ -120,6 +120,16 @@ const TripService = {
 
     return Mapper.evaluation.toEntity(dto);
   },
+
+  async evaluateDriver(userId: string, payload: EvaluateUserPayload): Promise<EvaluationEntity> {
+    const token = await getRequiredAccessToken();
+    const dto = await UserRequest.evaluateUser(token, userId, {
+      feedback: payload.feedback,
+      note: payload.note,
+    });
+
+    return Mapper.evaluation.toEntity(dto);
+  },
 };
 
 export { TripService };

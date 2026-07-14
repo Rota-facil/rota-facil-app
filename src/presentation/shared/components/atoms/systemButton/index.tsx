@@ -6,7 +6,7 @@ import { SYSTEM_BUTTON_VARIANTS } from "./variants";
 
 type MaterialIconName = React.ComponentProps<typeof MaterialIcons>["name"];
 
-type SystemButtonVariant = "primary" | "white" | "danger";
+type SystemButtonVariant = "primary" | "white" | "danger" | "warning";
 
 interface SystemButtonProps {
   title: string;

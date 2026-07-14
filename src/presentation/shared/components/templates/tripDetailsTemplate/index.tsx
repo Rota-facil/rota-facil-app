@@ -573,10 +573,10 @@ function DriverStudentListItem({
           <Pressable
             accessibilityRole="button"
             onPress={() => onEvaluate(student)}
-            className="flex-row items-center rounded-full bg-[#FFF4DA] px-3 py-2 active:opacity-80"
+            className="flex-row items-center rounded-full bg-[#FBBF24] px-3 py-2 active:opacity-80"
           >
-            <MaterialIcons name="star" size={16} color={colors.accentGlow} />
-            <Text className="ml-1.5 text-xs font-bold text-[#92400E]">Avaliar</Text>
+            <MaterialIcons name="star" size={16} color="#1F2937" />
+            <Text className="ml-1.5 text-xs font-bold text-[#1F2937]">Avaliar</Text>
           </Pressable>
         ) : null}
       </View>

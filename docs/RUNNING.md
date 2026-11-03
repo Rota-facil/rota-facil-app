@@ -10,7 +10,7 @@ O projeto utiliza Expo com Development Build. O Expo Go não é mais o ambiente 
 
 ## Requisitos do Ambiente
 
-Antes de executar o projeto, é necessário possuir Node.js e npm compatíveis com as versões definidas pelo projeto. As versões esperadas devem ser respeitadas para evitar divergências entre o ambiente local, o CI e os builds executados pelo EAS. Também é necessário possuir acesso ao repositório e às variáveis de ambiente utilizadas pela aplicação.
+Antes de executar o projeto, é necessário possuir Bun na versão declarada em `package.json` e Node.js LTS compatível com as ferramentas do Expo. As versões esperadas devem ser respeitadas para evitar divergências entre o ambiente local, o CI e os builds executados pelo EAS. Também é necessário possuir acesso ao repositório e às variáveis de ambiente utilizadas pela aplicação.
 
 Para execução em dispositivo físico, o computador e o celular devem estar preferencialmente conectados à mesma rede local.
 
@@ -45,10 +45,10 @@ Todos os comandos apresentados neste documento devem ser executados a partir da 
 As dependências devem ser instaladas utilizando o lockfile versionado no repositório.
 
 ```bash
-npm ci --include=dev
+bun install --frozen-lockfile
 ```
 
-O uso de `npm ci` garante que a instalação respeite a árvore de dependências registrada no `package-lock.json`. Esse é o fluxo recomendado para preparar um ambiente já existente e deve ser preferido ao `npm install` quando não houver intenção de alterar dependências. O comando `npm install` deve ser utilizado apenas quando for necessário adicionar, remover ou atualizar pacotes e, consequentemente, atualizar o `package-lock.json`.
+O uso de `bun install --frozen-lockfile` garante que a instalação respeite a árvore de dependências registrada no `bun.lock`. Esse é o fluxo recomendado para preparar um ambiente já existente e deve ser preferido ao `bun install` quando não houver intenção de alterar dependências. O comando `bun install` deve ser utilizado quando for necessário adicionar, remover ou atualizar pacotes e, consequentemente, atualizar o `bun.lock`.
 
 Após a instalação, a pasta `node_modules` será criada automaticamente.
 
@@ -83,7 +83,7 @@ No celular, `localhost` representa o próprio dispositivo e não a máquina resp
 Com as dependências instaladas e as variáveis de ambiente configuradas, inicie o servidor de desenvolvimento.
 
 ```bash
-npm run start
+bun run start
 ```
 
 Esse comando inicia o Metro e disponibiliza o bundle da aplicação para os Development Builds compatíveis com o projeto. O terminal exibirá as opções de conexão e, quando aplicável, um QR Code para abertura do projeto.
@@ -115,7 +115,7 @@ O fluxo recomendado para validar funcionalidades reais do aplicativo utiliza um 
 Com o computador e o dispositivo conectados à mesma rede local, inicie o Metro.
 
 ```bash
-npm run start
+bun run start
 ```
 
 Em seguida, abra o aplicativo Rota Fácil instalado no dispositivo. O Development Build possui um ambiente próprio de desenvolvimento e pode se conectar ao servidor Metro disponível na rede. Também é possível utilizar o QR Code exibido no terminal. Ao abrir o endereço correspondente no celular, o Android deve direcionar a execução para o Development Build do Rota Fácil.
@@ -125,7 +125,7 @@ O fluxo é:
 ```text
 Computador
     ↓
-npm run start
+bun run start
     ↓
 Metro disponível na rede
     ↓
@@ -149,7 +149,7 @@ O projeto também pode ser executado em um Android Emulator. Para esse fluxo, o 
 Com o emulador ativo, inicie o Metro.
 
 ```bash
-npm run start
+bun run start
 ```
 
 No terminal do Expo, utilize a opção de abertura no Android.
@@ -167,7 +167,7 @@ O fluxo é:
 ```text
 Android Emulator iniciado
           ↓
-    npm run start
+    bun run start
           ↓
          Metro
           ↓
@@ -227,7 +227,7 @@ regras de negócio
 Nesses casos, basta utilizar o fluxo normal com:
 
 ```bash
-npm run start
+bun run start
 ```
 
 <br/>
@@ -240,24 +240,24 @@ npm run start
 Antes de enviar alterações, execute as validações definidas pelo projeto.
 
 ```bash
-npm run format
+bun run lint
 ```
 
 ```bash
-npm run lint
+bun run typecheck
 ```
 
 Também é recomendado verificar a integridade do ambiente Expo.
 
 ```bash
-npx expo-doctor
+bunx expo-doctor
 ```
 
-Quando houver alterações em dependências ou no `package-lock.json`, valide uma instalação limpa.
+Quando houver alterações em dependências ou no `bun.lock`, valide uma instalação limpa.
 
 ```bash
 rm -rf node_modules
-npm ci --include=dev
+bun install --frozen-lockfile
 ```
 
 Esse teste reduz diferenças entre o ambiente local e os ambientes automatizados de CI e build.
@@ -271,7 +271,7 @@ Esse teste reduz diferenças entre o ambiente local e os ambientes automatizados
 Depois que o Development Build estiver instalado no dispositivo ou emulador, o fluxo diário de desenvolvimento é simples. Inicie o backend quando necessário, confirme que o `.env` aponta para o ambiente correto e inicie o Metro.
 
 ```bash
-npm run start
+bun run start
 ```
 
 Abra o Rota Fácil no dispositivo físico ou utilize o Android Emulator, conecte o Development Build ao servidor Metro. A partir desse momento, alterações comuns no código são enviadas diretamente para a aplicação e não exigem recompilação nativa. A geração de um novo Development Build deve ser realizada apenas quando a configuração nativa do projeto for modificada.
@@ -285,5 +285,6 @@ Abra o Rota Fácil no dispositivo físico ou utilize o Android Emulator, conecte
 📌 [Overview](../README.md)
 📌 [Como contribuir](./CONTRIBUTING.md)
 📌 [Estrutura do projeto](./PROJECT_STRUCTURE.md)
+📌 [Estratégia de testes](./TESTING.md)
 📌 [Principais telas do aplicativo](./SCREENS.md)
 📌 [Geração de Development Build com EAS](./EAS_BUILD.md)

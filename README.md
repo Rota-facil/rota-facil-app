@@ -14,6 +14,7 @@ A documentação do projeto foi organizada em arquivos separados para facilitar 
 📌 [Como contribuir](./docs/CONTRIBUTING.md)   
 📌 [Estrutura do projeto](./docs/PROJECT_STRUCTURE.md)   
 📌 [Como executar o projeto](./docs/RUNNING.md)   
+📌 [Estratégia de testes](./docs/TESTING.md)
 📌 [Principais telas do aplicativo](./docs/SCREENS.md)  
 
 

@@ -1,7 +1,13 @@
-// msw server
+import { MswServer } from "./mocks/server";
 
-beforeAll(() => {});
+beforeAll(() => {
+  MswServer.listen({ onUnhandledRequest: "error" });
+});
 
-afterEach(() => {});
+afterEach(() => {
+  MswServer.resetHandlers();
+});
 
-afterAll(() => {});
+afterAll(() => {
+  MswServer.close();
+});

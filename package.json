@@ -10,8 +10,14 @@
     "lint": "biome check .",
     "lint:fix": "biome check . --write",
     "format": "biome format . --write",
+    "prepare": "lefthook install",
+    "typecheck": "tsc --noEmit",
+    "test-logic": "bun test",
+    "test-ui": "jest --ci --coverage=true",
+    "test-full": "bun run test-logic && bun run test-ui",
     "test": "jest --coverage",
-    "testDebug": "jest -o --coverage=false",
+    "test-ui-debug": "jest --ci --coverage=false",
+    "test:unit": "bun run test-logic",
     "updateSnapshots": "jest -u --coverage=false"
   },
   "engines": {
@@ -79,6 +85,7 @@
     "jest": "~29.7.0",
     "jest-expo": "~54.0.17",
     "lefthook": "^2.1.8",
+    "msw": "2.15.0",
     "typescript": "~5.9.2"
   },
   "private": true,

@@ -20,8 +20,9 @@ commit-msg:
       run: bun commitlint --edit {1}
 
 pre-push:
- commands:
-   tests:
-     run: bun test
-   presentation-testes:
-     run: bun run test -- --ci --passWithNoTests
+  parallel: false
+  commands:
+    checks:
+      run: bun run lint && bun run typecheck
+    tests:
+      run: bun run test-full

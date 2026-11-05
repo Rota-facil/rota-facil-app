@@ -45,11 +45,12 @@ Antes da abertura de um pull request, é obrigatório garantir que a aplicação
 Toda alteração em código, configuração ou estrutura do projeto deve terminar com:
 
 ```bash
-npm run format
-npm run lint
+bun run lint
+bun run typecheck
+bun run test-full
 ```
 
-Caso qualquer comando falhe, o problema deve ser corrigido e ambos devem ser executados novamente.
+Caso qualquer comando falhe, o problema deve ser corrigido e os comandos devem ser executados novamente. Alterações exclusivamente documentais não exigem a execução da suíte, mas devem preservar a consistência dos comandos e caminhos apresentados na documentação.
 
 Mudanças apenas em documentação não exigem essa validação.
 
@@ -59,13 +60,9 @@ Uma validação não executada deve ser informada explicitamente. Não se deve a
 
 ## Testes
 
-Ainda não existe infraestrutura de testes automatizados no projeto.
+O projeto utiliza dois fluxos de testes complementares. O Bun executa testes de lógica pura, enquanto o Jest com `jest-expo` e React Native Testing Library executa testes de hooks, componentes, telas e integrações que dependem do ambiente React Native. A arquitetura, a convenção de nomes, o uso do MSW e os comandos completos estão descritos no [guia de testes](./TESTING.md).
 
-Quando ela for adicionada, os testes deverão preferencialmente permanecer próximos ao código utilizando arquivos `*.test.ts` ou `*.test.tsx`.
-
-A prioridade de cobertura deve começar por regras de negócio e serviços, seguida por mapeadores, hooks e fluxos críticos de interface e formulários.
-
-A ausência atual de testes não justifica mover lógica de negócio para componentes ou acoplar camadas que deveriam permanecer independentes.
+Ao contribuir, preserve essa separação. Funções puras, mapeadores e regras de negócio devem ser testados com o Bun sempre que não dependerem de React ou APIs nativas. Hooks e comportamentos que dependam de estado, contexto, efeitos, Expo ou React Native devem ser testados com Jest e `renderHook` ou `render`, conforme o caso.
 
 ## Commits e Pull Requests
 
@@ -101,7 +98,7 @@ A observabilidade deve permanecer centralizada em `logError`, enquanto mensagens
 
 Uma contribuição está pronta quando o comportamento solicitado foi implementado na camada adequada, as dependências arquiteturais foram preservadas e os fluxos relevantes foram validados.
 
-Para mudanças que não sejam exclusivamente de documentação, `npm run format` e `npm run lint` devem terminar com sucesso.
+Para mudanças que não sejam exclusivamente de documentação, `bun run lint`, `bun run typecheck` e `bun run test-full` devem terminar com sucesso.
 
 Nenhuma falha conhecida causada pela alteração deve permanecer escondida ou ignorada. O resultado da contribuição deve informar claramente o que foi alterado e o que foi efetivamente validado.
 
@@ -127,5 +124,6 @@ Navegue pela documentação :
 📌 [Overview](../README.md)   
 📌 [Estrutura do projeto](./PROJECT_STRUCTURE.md)   
 📌 [Como executar o projeto](./RUNNING.md)   
+📌 [Estratégia de testes](./TESTING.md)
 📌 [Principais telas do aplicativo](./SCREENS.md)  
 📌 [Geração de Development Build com EAS](./EAS_BUILD.md)

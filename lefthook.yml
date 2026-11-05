@@ -4,7 +4,7 @@ pre-commit:
     biome:
       glob: "*.{js,jsx,ts,tsx,json}"
       run: |
-        npx biome check --write --no-errors-on-unmatched {staged_files}
+        bun biome check --write --no-errors-on-unmatched {staged_files}
 
         status=$?
 
@@ -17,9 +17,12 @@ pre-commit:
 commit-msg:
   commands:
     commitlint:
-      run: npx commitlint --edit {1}
+      run: bun commitlint --edit {1}
 
-#pre-push:
-#  commands:
-#    tests:
-#      run: npm test -- --ci --passWithNoTests
+pre-push:
+  parallel: false
+  commands:
+    checks:
+      run: bun run lint && bun run typecheck
+    tests:
+      run: bun run test-full
